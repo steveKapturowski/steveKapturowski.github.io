@@ -1,10 +1,17 @@
-<html>
-	<body>
-		<h1 align=center>
-			A fledgeling blog about black holes, machine learning, and quantum physics
-		</h1>
-		<h1 align=center>
-			More soon to come...
-		</h1>
-	</body>
-</html>
+---
+layout: default
+---
+
+<div class="home">
+  <div class="posts">
+    {% for post in paginator.posts %}
+      <div class="post">
+        <a href="{{ post.url | prepend: site.baseurl }}" class="post-link">
+          <!-- <p class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</p> -->
+          <h3 class="h2 post-title">{{ post.title }}</h3>
+          <p class="post-summary">{{ post.summary }}</p>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>

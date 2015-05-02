@@ -1,6 +1,42 @@
-defaults:
-  -
-    scope:
-      path: ""
-    values:
-      layout: "default"
+# Site settings
+title:       "Strange Matter - A fledgeling blog about math, machine learning, and black holes"
+email:       myrealnamewascensored@gmail.com
+author:      Steven Kapturowski
+description: ""
+baseurl:     ""
+url:         ""
+
+# Social icons
+show_social_icons: true
+github_username: steveKapturowski
+stackoverflow_id:
+twitter_username:
+google_plus_id:
+linkedin_username: stevenkapturowski
+bitcoin_url:
+angellist_username: "steven-kapturowski"
+paypal_url:
+flattr_button:
+
+# Post sharing icons
+show_sharing_icons: true
+share_text: 'Share this post!'
+# Change to 'true' to enable individual icons
+share_facebook: false
+share_twitter: true
+share_googleplus: false
+share_linkedin: false
+share_digg: false
+share_tumblr: false
+share_reddit: true
+share_stumbleupon: false
+share_hackernews: true
+
+# Build settings
+markdown:     redcarpet
+redcarpet:
+  extensions: ['smart', 'tables', 'with_toc_data']
+permalink:    pretty
+paginate:     10000
+sass:
+  compressed: true
