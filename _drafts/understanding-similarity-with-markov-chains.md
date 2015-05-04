@@ -37,7 +37,11 @@ $$ P = D^{-1}W $$
 
 where W is the weight matrix of the original graph, and D is a diagonal matrix defined by $$ D_{ii} = \sum_j W_{ij} $$
 
-Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities $$ P_{ij} $$ for the edge leaving i and arriving at j. A Markov Chain is said to be <i>ergodic</i> if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is <i>aperiodic</i>. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can't make your way back to the other states. I won't rigorously define what periodicity is meant here because [wikipedia](http://en.wikipedia.org/wiki/Markov_chain) does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic:
+Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities $$ P_{ij} $$ for the edge leaving i and arriving at j. A Markov Chain is said to be <i>ergodic</i> if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is <i>aperiodic</i>. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can't make your way back to the other states. I won't rigorously define what periodicity is meant here because [wikipedia](http://en.wikipedia.org/wiki/Markov_chain) does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic, with the periodicity of each state labeled:
+
+<center>
+	<img src="/images/periodicity.png" height="220" width="200">
+</center>
 
 Clearly no matter where you start you will end up returning to the original state with period 4. 
 

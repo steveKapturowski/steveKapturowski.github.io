@@ -38,7 +38,11 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;where W is the weight matrix of the original graph, and D is a diagonal matrix defined by &lt;script type=&quot;math/tex&quot;&gt; D_{ii} = \sum_j W_{ij} &lt;/script&gt;&lt;/p&gt;
 
-&lt;p&gt;Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities &lt;script type=&quot;math/tex&quot;&gt; P_{ij} &lt;/script&gt; for the edge leaving i and arriving at j. A Markov Chain is said to be &lt;i&gt;ergodic&lt;/i&gt; if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is &lt;i&gt;aperiodic&lt;/i&gt;. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because &lt;a href=&quot;http://en.wikipedia.org/wiki/Markov_chain&quot;&gt;wikipedia&lt;/a&gt; does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic:&lt;/p&gt;
+&lt;p&gt;Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities &lt;script type=&quot;math/tex&quot;&gt; P_{ij} &lt;/script&gt; for the edge leaving i and arriving at j. A Markov Chain is said to be &lt;i&gt;ergodic&lt;/i&gt; if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is &lt;i&gt;aperiodic&lt;/i&gt;. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because &lt;a href=&quot;http://en.wikipedia.org/wiki/Markov_chain&quot;&gt;wikipedia&lt;/a&gt; does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic, with the periodicity of each state labeled:&lt;/p&gt;
+
+&lt;center&gt;
+	&lt;img src=&quot;/images/periodicity.png&quot; height=&quot;220&quot; width=&quot;200&quot; /&gt;
+&lt;/center&gt;
 
 &lt;p&gt;Clearly no matter where you start you will end up returning to the original state with period 4. &lt;/p&gt;
 
