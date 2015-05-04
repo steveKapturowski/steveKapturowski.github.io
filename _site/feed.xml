@@ -105,154 +105,11 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;More still to come!&lt;/p&gt;
 
-&lt;!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$ --&gt;
-
-&lt;!-- $$ h^\epsilon_{ij} = T(v1-p) + (vp) $$ --&gt;
-
-&lt;!-- 
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
+&lt;!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
 
 
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;truncatedCommuteTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;truncatedHittingTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;
+$$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
 
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;truncatedHittingTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dia_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setdiag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([(&lt;/span&gt;&lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tolist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-
-	&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csr_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csr_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-	&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-		&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-		&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-		&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;
-		&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-		&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-
-	&lt;span class=&quot;c&quot;&gt;#Calculate remainder&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ceil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
- --&gt;
-
-&lt;!-- That&#39;s all! Hopefully you&#39;ve found it all an interesting read and are able to break out some of these ideas the next time you&#39;re faced with a nasty graph of data you need to make sense of. I&#39;ve tried to be fairly thorough, but it&#39;s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
- --&gt;
-
-</description>
-        <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
-        <link>/understanding-similarity</link>
-        <guid isPermaLink="true">/understanding-similarity</guid>
-      </item>
-    
-      <item>
-        <title>Understanding Similarity With Markov Chains</title>
-        <description>&lt;h2 id=&quot;shortest-path&quot;&gt;Shortest Path&lt;/h2&gt;
-
-&lt;p&gt;Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra’s algorithm. &lt;/p&gt;
-
-&lt;p&gt;For certain types of graphs and applications this might be good enough, but many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: &lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; P(deg(v)=k) \sim k^{-\gamma} &lt;/script&gt;
-
-&lt;p&gt;for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of &lt;script type=&quot;math/tex&quot;&gt;\{v\}&lt;/script&gt; enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the “Six degrees of Kevin Bacon” game.&lt;/p&gt;
-
-&lt;!-- ## Bipartite Graphs
-
-Bipartite graphs exhibit a special structure whereby the vertices can be partitioned into two sets such that the only edges in G are those &lt;i&gt;between&lt;/i&gt; the two sets.
-
-We can compute the singular value decomposition on large matrices via the Lanczos Method or Stochastic SVD --&gt;
-
-&lt;h2 id=&quot;markov-chains&quot;&gt;Markov Chains&lt;/h2&gt;
-
-&lt;p&gt;The picture to have in your head when you think about Markov Chains is just a (possibly directed) graph where every node’s outgoing edge weights sum to one and so can be interpreted as probabilities. &lt;/p&gt;
-
-&lt;center&gt;
-	&lt;img src=&quot;/images/sum_to_one.png&quot; height=&quot;220&quot; width=&quot;200&quot; /&gt;
-&lt;/center&gt;
-
-&lt;p&gt;Given any weighted graph we can always normalize the edge weights to satisfy this condition:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; P = D^{-1}W &lt;/script&gt;
-
-&lt;p&gt;where W is the weight matrix of the original graph, and D is a diagonal matrix defined by &lt;script type=&quot;math/tex&quot;&gt; D_{ii} = \sum_j W_{ij} &lt;/script&gt;&lt;/p&gt;
-
-&lt;p&gt;Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities &lt;script type=&quot;math/tex&quot;&gt; P_{ij} &lt;/script&gt; for the edge leaving i and arriving at j. A Markov Chain is said to be &lt;i&gt;ergodic&lt;/i&gt; if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is &lt;i&gt;aperiodic&lt;/i&gt;. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because &lt;a href=&quot;http://en.wikipedia.org/wiki/Markov_chain&quot;&gt;wikipedia&lt;/a&gt; does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic, with the periodicity of each state labeled:&lt;/p&gt;
-
-&lt;center&gt;
-	&lt;img src=&quot;/images/periodicity.png&quot; height=&quot;220&quot; width=&quot;200&quot; /&gt;
-&lt;/center&gt;
-
-&lt;p&gt;Clearly no matter where you start you will end up returning to the original state with period 4. &lt;/p&gt;
-
-&lt;p&gt;Consider a vector &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to &lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_k = \pi_{k-1}P \tag{1}&lt;/script&gt;
-
-&lt;p&gt;then in fact this is the random walk we just described. More generally we can start with any initial distribution and we’ll end up with a kind of weighted average over random walks with different starting points. &lt;/p&gt;
-
-&lt;p&gt;A distribution &lt;script type=&quot;math/tex&quot;&gt;\pi_0&lt;/script&gt; is called an equilibrium distribution if it satisfies:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_0^T = \pi_0^T P &lt;/script&gt;
-
-&lt;h2 id=&quot;what-do-random-walks-give-us-that-shortest-paths-dont&quot;&gt;What do Random Walks Give us that Shortest Paths Don’t?&lt;/h2&gt;
-
-&lt;p&gt;Consider a vertex i adjacent to a high degree vertex j, and a vertex k which has i as its only neighbor. Intuitively, it should make sense that &lt;script type=&quot;math/tex&quot;&gt; Sim(j, i) &gt; Sim(i, k) &lt;/script&gt; because their association is more uniquely distinguishing, but under path similarity they are the same.&lt;/p&gt;
-
-&lt;p&gt;Consider a random walk starting at i. If it hops to vertex j then at the next step the probability distribution would get smeared out over &lt;i&gt;every&lt;/i&gt; vertex that j is connected to, so ultimately j will tend to end up with a low probability. Conversely, if the random walk hops over to k, then at the next step the &lt;i&gt;only&lt;/i&gt; choice is for it to come back to i. In other words, the random walk can tell that there’s less randomness associated with these connections!&lt;/p&gt;
-
-&lt;p&gt;It’s possible to define a variety of different notions of similarity based on Markov chains, but they basically all capture this key feature. There’s no clear way to say which is theoretically &lt;i&gt;best&lt;/i&gt;, and if you have time it might be advisable to try several of them out and compare their performance on your particular data. &lt;/p&gt;
-
-&lt;p&gt;Below I discuss some possible choices, how to compute them, and some of their important properties.&lt;/p&gt;
-
-&lt;h2 id=&quot;pagerank&quot;&gt;PageRank&lt;/h2&gt;
-
-&lt;p&gt;We can compute the personalized PageRank for some initial distribution via a power iteration as follows:&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_t^T = \beta \pi_0^T + (1-\beta) \pi_{t-1}^T P &lt;/script&gt;
-
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
-
-
-&lt;span class=&quot;c&quot;&gt;# pi0 is any initial distribution&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;personalizedPageRank&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dia_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setdiag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([(&lt;/span&gt;&lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tolist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;
-
-	&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-		&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;
-
-	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-
-&lt;p&gt;If you don’t need or want a symmetric notion of similarity then this might be enough: given &lt;script type=&quot;math/tex&quot;&gt;\pi_0&lt;/script&gt; centered on vertex &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; you compute the PageRank and you take the vertices assigned the highest probability as the most similar.&lt;/p&gt;
-
-&lt;p&gt;Alternatively, given any &lt;i&gt;two&lt;/i&gt; vertices, we compute their PageRank’s separately, so each vertex gets transformed into a probability distribution. Now we simply use some standard method for comparing probability distributions such as &lt;a href=&quot;http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&quot;&gt;KL Divergence&lt;/a&gt; (which is also non-symmetric) or &lt;a href=&quot;http://en.wikipedia.org/wiki/Bhattacharyya_distance&quot;&gt;Bhattacharyya distance&lt;/a&gt; (which &lt;i&gt;is&lt;/i&gt; symmetric).&lt;/p&gt;
-
-&lt;h2 id=&quot;commute-times-and-hitting-times&quot;&gt;Commute Times and Hitting Times&lt;/h2&gt;
-
-&lt;p&gt;Hitting times are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the &lt;i&gt;commute time&lt;/i&gt; &lt;script type=&quot;math/tex&quot;&gt; C_{ij} \equiv h_{ij} + h_{ji} &lt;/script&gt; as the expected time to travel from i to j and then return back to i. &lt;/p&gt;
-
-&lt;p&gt;Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?&lt;/p&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} &lt;/script&gt;
-
-&lt;p&gt;Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.&lt;/p&gt;
-
-&lt;p&gt;This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!&lt;/p&gt;
-
-&lt;h2 id=&quot;power-iteration&quot;&gt;Power Iteration&lt;/h2&gt;
-
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] &lt;/script&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
 
@@ -287,7 +144,8 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
-&lt;p&gt;That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!&lt;/p&gt;
+
+That&#39;s all! Hopefully you&#39;ve found it all an interesting read and are able to break out some of these ideas the next time you&#39;re faced with a nasty graph of data you need to make sense of. I&#39;ve tried to be fairly thorough, but it&#39;s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated! --&gt;
 
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
@@ -349,7 +207,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
     
       <item>
         <title>MCMC, Renormalization, and the Ising Model</title>
-        <description>
+        <description>&lt;p&gt;Coming soon!&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>/ising-model</link>

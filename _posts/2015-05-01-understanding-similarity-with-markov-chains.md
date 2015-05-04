@@ -43,8 +43,6 @@ Starting at any vertex we can generate a random walk by repeatedly choosing a ne
 	<img src="/images/periodicity.png" height="220" width="200">
 </center>
 
-Clearly no matter where you start you will end up returning to the original state with period 4. 
-
 Consider a vector $$\pi$$ which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to 
 
 $$ \pi_k = \pi_{k-1}P \tag{1}$$ 
@@ -106,7 +104,12 @@ This would seem to put us in a difficult position, but fear not brave programmer
 
 ## Power Iteration
 
-$$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
+More still to come!
+
+<!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
+
+
+$$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
 
 {% highlight python %}
 from scipy import sparse
@@ -143,7 +146,8 @@ def truncatedHittingTimes(W, epsilon=.01, T=30):
 	return E_n
 {% endhighlight %}
 
-That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
+That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated! -->
+
 
 
 

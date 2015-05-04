@@ -200,11 +200,12 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>More still to come!</p>
 
-<!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$ -->
+<!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
 
-<!-- $$ h^\epsilon_{ij} = T(v1-p) + (vp) $$ -->
 
-<!-- 
+$$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
+
+
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 
 
@@ -237,10 +238,9 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">T_matrix</span> <span class="o">-</span> <span class="n">T_matrix</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="n">E_n</span></code></pre></div>
- -->
 
-<!-- That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
- -->
+
+That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated! -->
 
 
 </article>
