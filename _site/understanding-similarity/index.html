@@ -139,8 +139,6 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	<img src="/images/periodicity.png" height="220" width="200" />
 </center>
 
-<p>Clearly no matter where you start you will end up returning to the original state with period 4. </p>
-
 <p>Consider a vector <script type="math/tex">\pi</script> which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to </p>
 
 <script type="math/tex; mode=display"> \pi_k = \pi_{k-1}P \tag{1}</script>
@@ -200,8 +198,13 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <h2 id="power-iteration">Power Iteration</h2>
 
-<script type="math/tex; mode=display"> h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] </script>
+<p>More still to come!</p>
 
+<!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$ -->
+
+<!-- $$ h^\epsilon_{ij} = T(v1-p) + (vp) $$ -->
+
+<!-- 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 
 
@@ -234,8 +237,10 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">T_matrix</span> <span class="o">-</span> <span class="n">T_matrix</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
 
 	<span class="k">return</span> <span class="n">E_n</span></code></pre></div>
+ -->
 
-<p>That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!</p>
+<!-- That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
+ -->
 
 
 </article>
