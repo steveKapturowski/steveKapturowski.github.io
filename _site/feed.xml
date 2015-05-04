@@ -8,7 +8,137 @@
     
       <item>
         <title>Understanding Similarity With Markov Chains</title>
-        <description></description>
+        <description>&lt;h2 id=&quot;shortest-path&quot;&gt;Shortest Path&lt;/h2&gt;
+
+&lt;p&gt;Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra’s algorithm. &lt;/p&gt;
+
+&lt;p&gt;For certain types of graphs and applications this might be good enough, but many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: &lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; P(deg(v)=k) \sim k^{-\gamma} &lt;/script&gt;
+
+&lt;p&gt;for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of &lt;script type=&quot;math/tex&quot;&gt;\{v\}&lt;/script&gt; enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the “Six degrees of Kevin Bacon” game.&lt;/p&gt;
+
+&lt;!-- ## Bipartite Graphs
+
+Bipartite graphs exhibit a special structure whereby the vertices can be partitioned into two sets such that the only edges in G are those &lt;i&gt;between&lt;/i&gt; the two sets.
+
+We can compute the singular value decomposition on large matrices via the Lanczos Method or Stochastic SVD --&gt;
+
+&lt;h2 id=&quot;markov-chains&quot;&gt;Markov Chains&lt;/h2&gt;
+
+&lt;p&gt;The picture to have in your head when you think about Markov Chains is just a (possibly directed) graph where every node’s outgoing edge weights sum to one and so can be interpreted as probabilities. &lt;/p&gt;
+
+&lt;center&gt;
+	&lt;img src=&quot;/images/sum_to_one.png&quot; height=&quot;220&quot; width=&quot;200&quot; /&gt;
+&lt;/center&gt;
+
+&lt;p&gt;Given any weighted graph we can always normalize the edge weights to satisfy this condition:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; P = D^{-1}W &lt;/script&gt;
+
+&lt;p&gt;where W is the weight matrix of the original graph, and D is a diagonal matrix defined by &lt;script type=&quot;math/tex&quot;&gt; D_{ii} = \sum_j W_{ij} &lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities &lt;script type=&quot;math/tex&quot;&gt; P_{ij} &lt;/script&gt; for the edge leaving i and arriving at j. A Markov Chain is said to be &lt;i&gt;ergodic&lt;/i&gt; if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is &lt;i&gt;aperiodic&lt;/i&gt;. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because &lt;a href=&quot;http://en.wikipedia.org/wiki/Markov_chain&quot;&gt;wikipedia&lt;/a&gt; does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic:&lt;/p&gt;
+
+&lt;p&gt;Clearly no matter where you start you will end up returning to the original state with period 4. &lt;/p&gt;
+
+&lt;p&gt;Consider a vector &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to &lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_k = \pi_{k-1}P \tag{1}&lt;/script&gt;
+
+&lt;p&gt;then in fact this is the random walk we just described. More generally we can start with any initial distribution and we’ll end up with a kind of weighted average over random walks with different starting points. &lt;/p&gt;
+
+&lt;p&gt;A distribution &lt;script type=&quot;math/tex&quot;&gt;\pi_0&lt;/script&gt; is called an equilibrium distribution if it satisfies:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_0^T = \pi_0^T P &lt;/script&gt;
+
+&lt;h2 id=&quot;what-do-random-walks-give-us-that-shortest-paths-dont&quot;&gt;What do Random Walks Give us that Shortest Paths Don’t?&lt;/h2&gt;
+
+&lt;p&gt;Consider a vertex i adjacent to a high degree vertex j, and a vertex k which has i as its only neighbor. Intuitively, it should make sense that &lt;script type=&quot;math/tex&quot;&gt; Sim(j, i) &gt; Sim(i, k) &lt;/script&gt; because their association is more uniquely distinguishing, but under path similarity they are the same.&lt;/p&gt;
+
+&lt;p&gt;Consider a random walk starting at i. If it hops to vertex j then at the next step the probability distribution would get smeared out over &lt;i&gt;every&lt;/i&gt; vertex that j is connected to, so ultimately j will tend to end up with a low probability. Conversely, if the random walk hops over to k, then at the next step the &lt;i&gt;only&lt;/i&gt; choice is for it to come back to i. In other words, the random walk can tell that there’s less randomness associated with these connections!&lt;/p&gt;
+
+&lt;p&gt;It’s possible to define a variety of different notions of similarity based on Markov chains, but they basically all capture this key feature. There’s no clear way to say which is theoretically &lt;i&gt;best&lt;/i&gt;, and if you have time it might be advisable to try several of them out and compare their performance on your particular data. &lt;/p&gt;
+
+&lt;p&gt;Below I discuss some possible choices, how to compute them, and some of their important properties.&lt;/p&gt;
+
+&lt;h2 id=&quot;pagerank&quot;&gt;PageRank&lt;/h2&gt;
+
+&lt;p&gt;We can compute the personalized PageRank for some initial distribution via a power iteration as follows:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_t^T = \beta \pi_0^T + (1-\beta) \pi_{t-1}^T P &lt;/script&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
+
+
+&lt;span class=&quot;c&quot;&gt;# pi0 is any initial distribution&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;personalizedPageRank&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dia_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setdiag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([(&lt;/span&gt;&lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tolist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;copy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;beta&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pi_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;If you don’t need or want a symmetric notion of similarity then this might be enough: given &lt;script type=&quot;math/tex&quot;&gt;\pi_0&lt;/script&gt; centered on vertex &lt;script type=&quot;math/tex&quot;&gt;v&lt;/script&gt; you compute the PageRank and you take the vertices assigned the highest probability as the most similar.&lt;/p&gt;
+
+&lt;p&gt;Alternatively, given any &lt;i&gt;two&lt;/i&gt; vertices, we compute their PageRank’s separately, so each vertex gets transformed into a probability distribution. Now we simply use some standard method for comparing probability distributions such as &lt;a href=&quot;http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence&quot;&gt;KL Divergence&lt;/a&gt; (which is also non-symmetric) or &lt;a href=&quot;http://en.wikipedia.org/wiki/Bhattacharyya_distance&quot;&gt;Bhattacharyya distance&lt;/a&gt; (which &lt;i&gt;is&lt;/i&gt; symmetric).&lt;/p&gt;
+
+&lt;h2 id=&quot;commute-times-and-hitting-times&quot;&gt;Commute Times and Hitting Times&lt;/h2&gt;
+
+&lt;p&gt;Hitting times are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the &lt;i&gt;commute time&lt;/i&gt; &lt;script type=&quot;math/tex&quot;&gt; C_{ij} \equiv h_{ij} + h_{ji} &lt;/script&gt; as the expected time to travel from i to j and then return back to i. &lt;/p&gt;
+
+&lt;p&gt;Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} &lt;/script&gt;
+
+&lt;p&gt;Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.&lt;/p&gt;
+
+&lt;p&gt;This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!&lt;/p&gt;
+
+&lt;h2 id=&quot;power-iteration&quot;&gt;Power Iteration&lt;/h2&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] &lt;/script&gt;
+
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;truncatedCommuteTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;truncatedHittingTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;truncatedHittingTimes&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;epsilon&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=.&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;01&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dia_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;setdiag&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([(&lt;/span&gt;&lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;**-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;num&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tolist&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;D_inv&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;W&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;I&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;identity&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;I&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csr_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;csr_matrix&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+	&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+		&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+		&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
+
+	&lt;span class=&quot;c&quot;&gt;#Calculate remainder&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;P_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ceil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;T&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!&lt;/p&gt;
+
+</description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>/understanding-similarity</link>
         <guid isPermaLink="true">/understanding-similarity</guid>
@@ -16,10 +146,63 @@
     
       <item>
         <title>Stellar Collapse, Or How does an event horizon form anyway?</title>
-        <description></description>
+        <description>&lt;p&gt;The picture is familiar: Alice and Bob are outside a black hole in a rocket. The rocket is burning its thrusters to keep it at a fixed radius, and Alice, unable to contain her curiousity departs the rocket, plumeting toward the black hole. Bob sees Alice slow more and more as she approaches the event horizon, growing dimmer and dimmer, until the last remaining photons emitted from her are redshifted to nothing. &lt;/p&gt;
+
+&lt;p&gt;Disregarding the quantum nature of photons and assuming Bob has access to a stupidly powerful photon detector, he would see it take an infinite amount of time for Alice to pass through the event horizon. But simultaneously, Alice’s own clock continues to run as normal as she passes through the event horizon in short order without noticing anything special (and presumably not being vaporized by any firewall) and hitting the singularity in finite proper time. But we also know that black holes emit Hawking radiation, shrinking over time. This process occurs at an exceedingly slow rate, but nevertheless, the black hole’s lifespan is ultimately finite. &lt;/p&gt;
+
+&lt;p&gt;So now Bob has a new picture: Alice approaches the horizon and slows down as before, but now the horizon is always receding just ahead of her. Eventually it would seem the black hole must evaporate before Alice ever has a chance to fall in!&lt;/p&gt;
+
+&lt;p&gt;At face value it would &lt;i&gt;seem&lt;/i&gt; that a black hole can never gain mass. More importantly, you realize, how can the event horizon even form in the first place!&lt;/p&gt;
+
+&lt;p&gt;At this point people tend to divide into camps; those that trade hand-wavey explanations, those that write off black holes as fantastical nonsense; and those that persist for a while seeking a good answer, don’t find one from their professors or texts, walk away feeling disgruntled and ignore the problem for awhile until the question starts nagging at them too much and they repeat the process.&lt;/p&gt;
+
+&lt;p&gt;I was initially in the 3rd camp, but after a considerable amount of effort and calculation I seem to have arrived at a coherent explanation.&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Let’s first review some basics: &lt;/p&gt;
+
+&lt;p&gt;In General Relativity you have the freedom to choose any coordinate system you please, and the underlying mathematics (that being differential geometry) is defined in such a way as to be completely indifferent to your choice. A coordinate system is not the same thing as an observer, but it’s important to realize that your coordinate system can carry a physical meaning in the sense that it represents a choice of possible observers.&lt;/p&gt;
+
+&lt;p&gt;If you’ve learned a bit about differential geometry you might recall that generically you may need multiple coordinate patches in order to cover the entire manifold. These coordinate patches can be glued together smoothly where they overlap. &lt;/p&gt;
+
+&lt;p&gt;An observer is just some given trajectory on the manifold, and in simple cases you can define this trajectory entirely in one coordinate chart. But if this trajectory hits the “edge” of the coordinate chart in finite proper time then either you’ve reached a true singularity in the manifold or you need to find a new coordinate system. Fortunately you can often distinguish between the two situations by looking at curvature invariants such as the Kretschmann scalar. If it blows up then the singularity theorem has struck again, but if it stays finite you could still be in good shape. This is precisely the situation at the event horizon at r = 2M in Schwarzschild coordinates.&lt;/p&gt;
+
+&lt;p&gt;So far, so good. So where’s the problem? Well, given some physical process that you’d like to understand, there’s probably some coordinate system you can choose that drastically simplifies the calculations because it makes the symmetries of that particular system more explicit. So we study things using the reference frames in which a problem is easiest to grasp, but somewhere down the line we want to compare two results that were obtained using different coordinate systems. &lt;i&gt;Unless you are comparing invariant quantities &lt;b&gt;every&lt;/b&gt; calculation must come attached with the coordinates that produced it.&lt;/i&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Test particles obey the geodesic equation, but the geodesic equation is merely an approximation. Any sufficiently massive object must modify the spacetime according to the full gravitational field equations. This is assuredly the case in stellar collapse and it is invalid to reason that a star’s collapse proceeds as if superimposed over a background Schwarzschild spacetime.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; ds^2 = (1-\frac{2M}{r})c^2dt^2 - (1-\frac{2M}{r})^{-1}dr^2 + r^2d\Omega^2] &lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;ds^2 = c^2dt^2 - R(t)^2[d\chi^2 + sin^2(\chi)d\Omega^2] &lt;/script&gt;
+
+&lt;h2 id=&quot;references&quot;&gt;References:&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.aei.mpg.de/~rezzolla/lnotes/mondragone/collapse.pdf&quot;&gt;[1] L. Rezzolla, An Introduction to Gravitational Collapse to Black Holes.&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/1003.1359.pdf&quot;&gt;[2] S.N. Zhang, On the Solution to the “Frozen Star” Paradox, Nature of Astrophysical Black Holes, non-Existence of Gravitational Singularity in the Physical Universe and Applicability of the Birkhoff’s Theorem. Int.J.Mod.Phys.D20:1891-1899,2011 [arxiv.org:1003.1359]&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/1503.01487.pdf&quot;&gt;[3] A. Saini, D. Stojkovic, Radiation from a collapsing object is manifestly unitary. Phys.Rev.Lett. 114 (2015) 11, 11130 [arXiv:1503.01487 [gr-qc]]&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/PS_cache/gr-qc/pdf/0609/0609024v3.pdf&quot;&gt;[4] T. Vachaspati, D. Stojkovic, L.M. Krauss, Observation of Incipient Black Holes and the Information Loss Problem. Phys.Rev.D76:024005,2007 [arXiv:gr-qc/0609024]&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/1011.2219v2.pdf&quot;&gt;[5] E. Greenwood, D. Podolsky, G. Starkman, Pre-Hawking Radiation from a Collapsing Shell. [arXiv:1011.2219 [gr-qc]]&lt;/a&gt;&lt;/p&gt;
+
+</description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>/stellar-collapse</link>
         <guid isPermaLink="true">/stellar-collapse</guid>
+      </item>
+    
+      <item>
+        <title>MCMC, Renormalization, and the Ising Model</title>
+        <description>
+</description>
+        <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
+        <link>/ising-model</link>
+        <guid isPermaLink="true">/ising-model</guid>
       </item>
     
   </channel>

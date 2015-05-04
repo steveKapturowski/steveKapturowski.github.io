@@ -7,36 +7,37 @@ baseurl:     ""
 url:         ""
 
 # Social icons
-show_social_icons: true
-github_username: steveKapturowski
+show_social_icons:  true
+github_username:    steveKapturowski
 stackoverflow_id:
 twitter_username:
 google_plus_id:
-linkedin_username: stevenkapturowski
+linkedin_username:  stevenkapturowski
 bitcoin_url:
-angellist_username: "steven-kapturowski"
+angellist_username: steven-kapturowski
 paypal_url:
 flattr_button:
 
 # Post sharing icons
 show_sharing_icons: true
-share_text: 'Share this post!'
-# Change to 'true' to enable individual icons
-share_facebook: false
-share_twitter: true
-share_googleplus: false
-share_linkedin: false
-share_digg: false
-share_tumblr: false
-share_reddit: true
-share_stumbleupon: false
-share_hackernews: true
+share_text:         Share this post!
+share_facebook:     false
+share_twitter:      true
+share_googleplus:   false
+share_linkedin:     false
+share_digg:         false
+share_tumblr:       false
+share_reddit:       true
+share_stumbleupon:  false
+share_hackernews:   true
 
 # Build settings
-markdown:     redcarpet
+markdown:     kramdown
 redcarpet:
   extensions: ['smart', 'tables', 'with_toc_data']
 permalink:    pretty
+highlighter:  pygments
 paginate:     10000
 sass:
   compressed: true
+

@@ -31,20 +31,20 @@
     <meta property="og:site_name" content="Strange Matter - A fledgeling blog about math, machine learning, and black holes">
 
     <!-- Icons -->
-    <link rel="apple-touch-icon" sizes="57x57" href="apple-touch-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="apple-touch-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="apple-touch-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="apple-touch-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="apple-touch-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" href="favicon-192x192.png" sizes="192x192">
-    <link rel="icon" type="image/png" href="favicon-160x160.png" sizes="160x160">
-    <link rel="icon" type="image/png" href="favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
-    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="apple-touch-icon" sizes="57x57" href="images/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="images/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="images/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="images/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="images/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="images/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="images/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="images/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="images/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="images/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="images/favicon-32x32.png" sizes="32x32">
 </head>
 
 <body class="">
@@ -95,17 +95,145 @@
         
 
 
-
-
 <div class="post-header mb2">
   <h1>Understanding Similarity With Markov Chains</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">1 minute read</span>
+  <span class="post-meta small">9 minute read</span>
 </div>
 
 <article class="post-content">
-  
+  <h2 id="shortest-path">Shortest Path</h2>
+
+<p>Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra’s algorithm. </p>
+
+<p>For certain types of graphs and applications this might be good enough, but many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: </p>
+
+<script type="math/tex; mode=display"> P(deg(v)=k) \sim k^{-\gamma} </script>
+
+<p>for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of <script type="math/tex">\{v\}</script> enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the “Six degrees of Kevin Bacon” game.</p>
+
+<!-- ## Bipartite Graphs
+
+Bipartite graphs exhibit a special structure whereby the vertices can be partitioned into two sets such that the only edges in G are those <i>between</i> the two sets.
+
+We can compute the singular value decomposition on large matrices via the Lanczos Method or Stochastic SVD -->
+
+<h2 id="markov-chains">Markov Chains</h2>
+
+<p>The picture to have in your head when you think about Markov Chains is just a (possibly directed) graph where every node’s outgoing edge weights sum to one and so can be interpreted as probabilities. </p>
+
+<center>
+	<img src="/images/sum_to_one.png" height="220" width="200" />
+</center>
+
+<p>Given any weighted graph we can always normalize the edge weights to satisfy this condition:</p>
+
+<script type="math/tex; mode=display"> P = D^{-1}W </script>
+
+<p>where W is the weight matrix of the original graph, and D is a diagonal matrix defined by <script type="math/tex"> D_{ii} = \sum_j W_{ij} </script></p>
+
+<p>Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities <script type="math/tex"> P_{ij} </script> for the edge leaving i and arriving at j. A Markov Chain is said to be <i>ergodic</i> if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is <i>aperiodic</i>. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because <a href="http://en.wikipedia.org/wiki/Markov_chain">wikipedia</a> does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic:</p>
+
+<p>Clearly no matter where you start you will end up returning to the original state with period 4. </p>
+
+<p>Consider a vector <script type="math/tex">\pi</script> which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to </p>
+
+<script type="math/tex; mode=display"> \pi_k = \pi_{k-1}P \tag{1}</script>
+
+<p>then in fact this is the random walk we just described. More generally we can start with any initial distribution and we’ll end up with a kind of weighted average over random walks with different starting points. </p>
+
+<p>A distribution <script type="math/tex">\pi_0</script> is called an equilibrium distribution if it satisfies:</p>
+
+<script type="math/tex; mode=display"> \pi_0^T = \pi_0^T P </script>
+
+<h2 id="what-do-random-walks-give-us-that-shortest-paths-dont">What do Random Walks Give us that Shortest Paths Don’t?</h2>
+
+<p>Consider a vertex i adjacent to a high degree vertex j, and a vertex k which has i as its only neighbor. Intuitively, it should make sense that <script type="math/tex"> Sim(j, i) > Sim(i, k) </script> because their association is more uniquely distinguishing, but under path similarity they are the same.</p>
+
+<p>Consider a random walk starting at i. If it hops to vertex j then at the next step the probability distribution would get smeared out over <i>every</i> vertex that j is connected to, so ultimately j will tend to end up with a low probability. Conversely, if the random walk hops over to k, then at the next step the <i>only</i> choice is for it to come back to i. In other words, the random walk can tell that there’s less randomness associated with these connections!</p>
+
+<p>It’s possible to define a variety of different notions of similarity based on Markov chains, but they basically all capture this key feature. There’s no clear way to say which is theoretically <i>best</i>, and if you have time it might be advisable to try several of them out and compare their performance on your particular data. </p>
+
+<p>Below I discuss some possible choices, how to compute them, and some of their important properties.</p>
+
+<h2 id="pagerank">PageRank</h2>
+
+<p>We can compute the personalized PageRank for some initial distribution via a power iteration as follows:</p>
+
+<script type="math/tex; mode=display"> \pi_t^T = \beta \pi_0^T + (1-\beta) \pi_{t-1}^T P </script>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+
+<span class="c"># pi0 is any initial distribution</span>
+<span class="k">def</span> <span class="nf">personalizedPageRank</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">pi0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+	<span class="n">D_inv</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="n">D_inv</span><span class="o">.</span><span class="n">setdiag</span><span class="p">([(</span><span class="ow">not</span> <span class="n">num</span> <span class="ow">or</span> <span class="n">num</span><span class="o">**-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
+	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span> <span class="o">*</span> <span class="n">W</span>
+
+	<span class="n">pi_n</span> <span class="o">=</span> <span class="n">pi0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+		<span class="n">pi_n</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="n">pi0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">pi_n</span><span class="o">*</span><span class="n">P</span>
+
+	<span class="k">return</span> <span class="n">pi_n</span></code></pre></div>
+
+<p>If you don’t need or want a symmetric notion of similarity then this might be enough: given <script type="math/tex">\pi_0</script> centered on vertex <script type="math/tex">v</script> you compute the PageRank and you take the vertices assigned the highest probability as the most similar.</p>
+
+<p>Alternatively, given any <i>two</i> vertices, we compute their PageRank’s separately, so each vertex gets transformed into a probability distribution. Now we simply use some standard method for comparing probability distributions such as <a href="http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">KL Divergence</a> (which is also non-symmetric) or <a href="http://en.wikipedia.org/wiki/Bhattacharyya_distance">Bhattacharyya distance</a> (which <i>is</i> symmetric).</p>
+
+<h2 id="commute-times-and-hitting-times">Commute Times and Hitting Times</h2>
+
+<p>Hitting times are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> <script type="math/tex"> C_{ij} \equiv h_{ij} + h_{ji} </script> as the expected time to travel from i to j and then return back to i. </p>
+
+<p>Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?</p>
+
+<script type="math/tex; mode=display"> h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} </script>
+
+<p>Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.</p>
+
+<p>This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!</p>
+
+<h2 id="power-iteration">Power Iteration</h2>
+
+<script type="math/tex; mode=display"> h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] </script>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+
+
+<span class="k">def</span> <span class="nf">truncatedCommuteTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=.</span><span class="mo">01</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+	<span class="n">E_n</span> <span class="o">=</span> <span class="n">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
+	<span class="k">return</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">E_n</span><span class="o">.</span><span class="n">T</span>
+
+
+<span class="k">def</span> <span class="nf">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=.</span><span class="mo">01</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+	<span class="n">D_inv</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="n">D_inv</span><span class="o">.</span><span class="n">setdiag</span><span class="p">([(</span><span class="ow">not</span> <span class="n">num</span> <span class="ow">or</span> <span class="n">num</span><span class="o">**-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
+	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span> <span class="o">*</span> <span class="n">W</span>
+	<span class="n">I</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+	<span class="n">P_n</span> <span class="o">=</span> <span class="n">I</span>
+	<span class="n">rho_n</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="n">E_n</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+	<span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">T</span><span class="p">:</span>
+		<span class="k">print</span> <span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">P_n</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho_n</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">E_n</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+		<span class="n">rho_n</span> <span class="o">=</span> <span class="n">rho_n</span> <span class="o">+</span> <span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
+		<span class="n">P_n</span> <span class="o">=</span> <span class="n">P_n</span><span class="o">*</span><span class="n">P</span>
+		<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">))</span>
+		<span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+	<span class="c">#Calculate remainder</span>
+	<span class="n">rho_n</span> <span class="o">=</span> <span class="n">rho_n</span> <span class="o">+</span> <span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
+	<span class="n">T_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">E_n</span> <span class="o">/</span> <span class="n">E_n</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">ceil</span><span class="p">()</span><span class="o">*</span><span class="n">T</span>
+	<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">T_matrix</span> <span class="o">-</span> <span class="n">T_matrix</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">E_n</span></code></pre></div>
+
+<p>That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!</p>
+
+
 </article>
 
 
@@ -157,3 +285,20 @@
 
 </body>
 </html>
+
+<!-- mathjax config similar to math.stackexchange -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  jax: ["input/TeX", "output/HTML-CSS"],
+  tex2jax: {
+    inlineMath: [ ['$', '$'] ],
+    displayMath: [ ['$$', '$$']],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  messageStyle: "none",
+  "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
+});
+</script>
+<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+
