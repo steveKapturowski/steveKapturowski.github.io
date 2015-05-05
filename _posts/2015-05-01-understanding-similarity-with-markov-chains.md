@@ -6,6 +6,7 @@ summary:   Facebook is a graph. Twitter is a graph. The internet is a graph. Alm
 permalink: understanding-similarity
 ---
 
+Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you're a data scientist, it's pretty important to know how to deal with graphs. It's a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think
 
 ## Shortest Path
 
@@ -15,7 +16,7 @@ For certain types of graphs and applications this might be good enough, but many
 
 $$ P(deg(v)=k) \sim k^{-\gamma} $$ 
 
-for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of $$\{v\}$$ enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the "Six degrees of Kevin Bacon" game.
+for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of $$\{v\}$$ enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the ["Six degrees of Kevin Bacon"](http://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon) game.
 
 <!-- ## Bipartite Graphs
 
@@ -92,24 +93,34 @@ Alternatively, given any <i>two</i> vertices, we compute their PageRank's separa
 
 ## Commute Times and Hitting Times
 
-Hitting times are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it's not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> $$ C_{ij} \equiv h_{ij} + h_{ji} $$ as the expected time to travel from i to j and then return back to i. 
+[Hitting times](http://en.wikipedia.org/wiki/Hitting_time) are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it's not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> $$ C_{ij} \equiv h_{ij} + h_{ji} $$ as the expected time to travel from i to j and then return back to i. 
 
 Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?
 
-$$ h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} $$
+$$ h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{pi_i \pi_j}} $$
 
-Now personally, I think this is a very cool formula. The only problem is that it's totally useless for most practical calculations. Assuming the graph we're dealing with is large enough to require exploiting its sparsity we're out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.
+where $$ L^\dagger = (L^T L)^{-1}L^T $$ is the [<i>Moore-Penrose pseudoinverse</i>](http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse), $$L = I - D^{-1/2} W D^{-1/2}$$ is the [<i>normalized graph Laplacian</i>](http://en.wikipedia.org/wiki/Laplacian_matrix), and $$\pi$$ is the stationary distribution of $$P$$. Now personally, I think this is a very cool formula. The only problem is that it's totally useless for most practical calculations. Assuming the graph we're dealing with is large enough to require exploiting its sparsity we're out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.
 
 This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!
 
 ## Power Iteration
 
-More still to come!
+The hitting time can be computed by the following expectation value:
 
-<!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
+$$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
 
+Truncating this series at some $$T-1$$ and adding in a remainder term we get the <i>truncated hitting time</i>:
 
-$$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
+$$ h_{ij}(T) = \bigg(\sum_{t=0}^{T-1} t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}]\bigg) + T[1-\sum_{k=0}^{T-1}(P^k)_{ij}] $$
+
+Finally, we can rewrite the above equation as follows to avoid having to compute powers of the transition matrix:
+
+$$ \rho_k^T(\hat{e}_i) = \rho_{k-1}^T(\hat{e}_i) P \mid \rho_0 = \hat{e}_i $$
+
+$$ h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T)_j]\bigg) + T[1-\sum_{k=0}^{T-1}(\rho_k^T)_j] $$
+
+This approximation will always underestimate the true hitting time, as all the unused probabily mass after $$T-1$$ gets lumped into the $$T$$ term. Thus we'll have to play with cutoff to make sure the range $$[0, T]$$ has sufficient resolution to capture most of the interesting behavior.
+
 
 {% highlight python %}
 from scipy import sparse
@@ -146,9 +157,11 @@ def truncatedHittingTimes(W, epsilon=.01, T=30):
 	return E_n
 {% endhighlight %}
 
-That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated! -->
+That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
 
+## References
 
+[D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.](http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf)
 
 
 

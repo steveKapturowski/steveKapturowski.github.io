@@ -43,7 +43,7 @@ $$ ds^2 = (1-\frac{2M}{r})c^2dt^2 - (1-\frac{2M}{r})^{-1}dr^2 + r^2d\Omega^2] $$
 $$ds^2 = c^2dt^2 - R(t)^2[d\chi^2 + sin^2(\chi)d\Omega^2] $$
 
 
-## References:
+## References
 
 [[1] L. Rezzolla, An Introduction to Gravitational Collapse to Black Holes.](http://www.aei.mpg.de/~rezzolla/lnotes/mondragone/collapse.pdf)
 

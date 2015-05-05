@@ -8,7 +8,9 @@
     
       <item>
         <title>Understanding Similarity With Markov Chains</title>
-        <description>&lt;h2 id=&quot;shortest-path&quot;&gt;Shortest Path&lt;/h2&gt;
+        <description>&lt;p&gt;Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you’re a data scientist, it’s pretty important to know how to deal with graphs. It’s a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think&lt;/p&gt;
+
+&lt;h2 id=&quot;shortest-path&quot;&gt;Shortest Path&lt;/h2&gt;
 
 &lt;p&gt;Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra’s algorithm. &lt;/p&gt;
 
@@ -16,7 +18,7 @@
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; P(deg(v)=k) \sim k^{-\gamma} &lt;/script&gt;
 
-&lt;p&gt;for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of &lt;script type=&quot;math/tex&quot;&gt;\{v\}&lt;/script&gt; enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the “Six degrees of Kevin Bacon” game.&lt;/p&gt;
+&lt;p&gt;for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of &lt;script type=&quot;math/tex&quot;&gt;\{v\}&lt;/script&gt; enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the &lt;a href=&quot;http://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon&quot;&gt;“Six degrees of Kevin Bacon”&lt;/a&gt; game.&lt;/p&gt;
 
 &lt;!-- ## Bipartite Graphs
 
@@ -91,25 +93,33 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;h2 id=&quot;commute-times-and-hitting-times&quot;&gt;Commute Times and Hitting Times&lt;/h2&gt;
 
-&lt;p&gt;Hitting times are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the &lt;i&gt;commute time&lt;/i&gt; &lt;script type=&quot;math/tex&quot;&gt; C_{ij} \equiv h_{ij} + h_{ji} &lt;/script&gt; as the expected time to travel from i to j and then return back to i. &lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Hitting_time&quot;&gt;Hitting times&lt;/a&gt; are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the &lt;i&gt;commute time&lt;/i&gt; &lt;script type=&quot;math/tex&quot;&gt; C_{ij} \equiv h_{ij} + h_{ji} &lt;/script&gt; as the expected time to travel from i to j and then return back to i. &lt;/p&gt;
 
 &lt;p&gt;Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?&lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} &lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{pi_i \pi_j}} &lt;/script&gt;
 
-&lt;p&gt;Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.&lt;/p&gt;
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt; L^\dagger = (L^T L)^{-1}L^T &lt;/script&gt; is the &lt;a href=&quot;http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse&quot;&gt;&lt;i&gt;Moore-Penrose pseudoinverse&lt;/i&gt;&lt;/a&gt;, &lt;script type=&quot;math/tex&quot;&gt;L = I - D^{-1/2} W D^{-1/2}&lt;/script&gt; is the &lt;a href=&quot;http://en.wikipedia.org/wiki/Laplacian_matrix&quot;&gt;&lt;i&gt;normalized graph Laplacian&lt;/i&gt;&lt;/a&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; is the stationary distribution of &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt;. Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.&lt;/p&gt;
 
 &lt;p&gt;This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!&lt;/p&gt;
 
 &lt;h2 id=&quot;power-iteration&quot;&gt;Power Iteration&lt;/h2&gt;
 
-&lt;p&gt;More still to come!&lt;/p&gt;
+&lt;p&gt;The hitting time can be computed by the following expectation value:&lt;/p&gt;
 
-&lt;!-- $$ h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] $$
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] &lt;/script&gt;
 
+&lt;p&gt;Truncating this series at some &lt;script type=&quot;math/tex&quot;&gt;T-1&lt;/script&gt; and adding in a remainder term we get the &lt;i&gt;truncated hitting time&lt;/i&gt;:&lt;/p&gt;
 
-$$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij}(T) = \bigg(\sum_{t=0}^{T-1} t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}]\bigg) + T[1-\sum_{k=0}^{T-1}(P^k)_{ij}] &lt;/script&gt;
 
+&lt;p&gt;Finally, we can rewrite the above equation as follows to avoid having to compute powers of the transition matrix:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \rho_k^T(\hat{e}_i) = \rho_{k-1}^T(\hat{e}_i) P \mid \rho_0 = \hat{e}_i &lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T)_j]\bigg) + T[1-\sum_{k=0}^{T-1}(\rho_k^T)_j] &lt;/script&gt;
+
+&lt;p&gt;This approximation will always underestimate the true hitting time, as all the unused probabily mass after &lt;script type=&quot;math/tex&quot;&gt;T-1&lt;/script&gt; gets lumped into the &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; term. Thus we’ll have to play with cutoff to make sure the range &lt;script type=&quot;math/tex&quot;&gt;[0, T]&lt;/script&gt; has sufficient resolution to capture most of the interesting behavior.&lt;/p&gt;
 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
 
@@ -144,8 +154,11 @@ $$ h^\epsilon_{ij} = T(v1-p) + (vp) $$
 
 	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 
+&lt;p&gt;That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!&lt;/p&gt;
 
-That&#39;s all! Hopefully you&#39;ve found it all an interesting read and are able to break out some of these ideas the next time you&#39;re faced with a nasty graph of data you need to make sense of. I&#39;ve tried to be fairly thorough, but it&#39;s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated! --&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf&quot;&gt;D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.&lt;/a&gt;&lt;/p&gt;
 
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
@@ -187,7 +200,7 @@ That&#39;s all! Hopefully you&#39;ve found it all an interesting read and are ab
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt;ds^2 = c^2dt^2 - R(t)^2[d\chi^2 + sin^2(\chi)d\Omega^2] &lt;/script&gt;
 
-&lt;h2 id=&quot;references&quot;&gt;References:&lt;/h2&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://www.aei.mpg.de/~rezzolla/lnotes/mondragone/collapse.pdf&quot;&gt;[1] L. Rezzolla, An Introduction to Gravitational Collapse to Black Holes.&lt;/a&gt;&lt;/p&gt;
 
