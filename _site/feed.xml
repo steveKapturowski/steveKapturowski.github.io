@@ -220,23 +220,25 @@ We can compute the singular value decomposition on large matrices via the Lanczo
     
       <item>
         <title>MCMC, Renormalization, and the Ising Model</title>
-        <description>&lt;!-- &lt;center&gt;
-&lt;video width=&quot;300&quot; height=&quot;240&quot; controls&gt;
-	&lt;source src=&quot;/videos/ising.m4v&quot; type=&quot;video/mp4&quot;&gt;
+        <description>&lt;center&gt;
+&lt;video width=&quot;300&quot; height=&quot;240&quot; controls=&quot;&quot;&gt;
+	&lt;source src=&quot;/videos/ising.m4v&quot; type=&quot;video/mp4&quot; /&gt;
 	Your browser does not support the video tag.
 &lt;/video&gt;
 
-&lt;video width=&quot;300&quot; height=&quot;240&quot; controls&gt;
+&lt;!-- &lt;video width=&quot;300&quot; height=&quot;240&quot; controls&gt;
   	&lt;source src=&quot;/videos/xy.m4v&quot; type=&quot;video/mp4&quot;&gt;
   	Your browser does not support the video tag.
-&lt;/video&gt;
-&lt;/center&gt; --&gt;
+&lt;/video&gt; --&gt;
+&lt;/center&gt;
 
 &lt;p&gt;The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.&lt;/p&gt;
 
 &lt;h2 id=&quot;solving-the-ising-model-in-2d&quot;&gt;Solving the Ising Model in 2D&lt;/h2&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; H = -\sum J_{ij}\sigma_i\sigma_j - \mu\sum h_j\sigma_j &lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \sum_{\{\sigma\}} e^{-\beta H}&lt;/script&gt;
 
 &lt;h2 id=&quot;criticality&quot;&gt;Criticality&lt;/h2&gt;
 

@@ -105,23 +105,25 @@
 </div>
 
 <article class="post-content">
-  <!-- <center>
-<video width="300" height="240" controls>
-	<source src="/videos/ising.m4v" type="video/mp4">
+  <center>
+<video width="300" height="240" controls="">
+	<source src="/videos/ising.m4v" type="video/mp4" />
 	Your browser does not support the video tag.
 </video>
 
-<video width="300" height="240" controls>
+<!-- <video width="300" height="240" controls>
   	<source src="/videos/xy.m4v" type="video/mp4">
   	Your browser does not support the video tag.
-</video>
-</center> -->
+</video> -->
+</center>
 
 <p>The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.</p>
 
 <h2 id="solving-the-ising-model-in-2d">Solving the Ising Model in 2D</h2>
 
 <script type="math/tex; mode=display"> H = -\sum J_{ij}\sigma_i\sigma_j - \mu\sum h_j\sigma_j </script>
+
+<script type="math/tex; mode=display"> Z = \sum_{\{\sigma\}} e^{-\beta H}</script>
 
 <h2 id="criticality">Criticality</h2>
 
