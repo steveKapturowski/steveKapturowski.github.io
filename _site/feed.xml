@@ -156,7 +156,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!&lt;/p&gt;
 
-&lt;h2 id=&quot;references&quot;&gt;References&lt;/h2&gt;
+&lt;h2 id=&quot;links-and-resources&quot;&gt;Links and Resources&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf&quot;&gt;D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.&lt;/a&gt;&lt;/p&gt;
 
@@ -235,9 +235,19 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \sum_{\{\sigma\}} e^{-\beta H}&lt;/script&gt;
 
+&lt;p&gt;This is just a simple algebraic equation, so in principle it tells us everything about the statistics mechanics of the system. The problem is that the number of terms in the sum is exponential in the number of states &lt;script type=&quot;math/tex&quot;&gt;\sigma&lt;/script&gt;. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we’ll do both.&lt;/p&gt;
+
+&lt;p&gt;Let’s start with (1):&lt;/p&gt;
+
+&lt;p&gt;Let N be the length of the lattice in each direction and assume periodic boundary conditions such that &lt;script type=&quot;math/tex&quot;&gt;\sigma_{Nj}&lt;/script&gt; neighbors &lt;script type=&quot;math/tex&quot;&gt;\sigma_{1j}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\sigma_{iN}&lt;/script&gt; neighbors &lt;script type=&quot;math/tex&quot;&gt;\sigma_{i1}&lt;/script&gt;. For simplicity let’s also turn off the external magnetic field (&lt;script type=&quot;math/tex&quot;&gt;h=0&lt;/script&gt;). Bringing the sum in the exponential down into a product of exponentials and using the relation &lt;script type=&quot;math/tex&quot;&gt;e^{lK} = \cosh(x) + l\sinh(K)&lt;/script&gt; for &lt;script type=&quot;math/tex&quot;&gt;l = \pm 1&lt;/script&gt; we have:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z= \sum_{\{\sigma\}} \prod_{\langle i,j\rangle} e^{\beta J \sigma_i\sigma_j} = \cosh(\beta J)^{2N^2} \sum \prod (1+\sigma_i \sigma_j \tanh(\beta J))&lt;/script&gt;
+
 &lt;h2 id=&quot;criticality&quot;&gt;Criticality&lt;/h2&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; T_c = \frac{2J}{k ln(1+\sqrt2)} &lt;/script&gt;
+&lt;p&gt;As it turns out, the Ising Model in two dimensions has a phase transition.&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; T_c = \frac{2J}{k \ln(1+\sqrt2)} &lt;/script&gt;
 
 &lt;h2 id=&quot;detailed-balance-in-markov-chains&quot;&gt;Detailed Balance in Markov Chains&lt;/h2&gt;
 
@@ -247,13 +257,30 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;h2 id=&quot;a-curious-link-to-quantum-field-theory&quot;&gt;A Curious Link to Quantum Field Theory&lt;/h2&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\partial_\mu\phi\partial^\mu\phi - \frac{1}{2}m^2\phi^2 - V(\phi)]} &lt;/script&gt;
+&lt;p&gt;The starting point for most quantum field theory is the path integral, such as this one describing a real scalar field:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\frac{1}{2}\partial_\mu\phi\partial^\mu\phi - \frac{1}{2}m^2\phi^2 - V(\phi)]} &lt;/script&gt;
+
+&lt;p&gt;Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. &lt;/p&gt;
+
+&lt;p&gt;The path integral is essentially a sum over all paths in spacetime. The notation with &lt;script type=&quot;math/tex&quot;&gt;\partial_\mu\phi\partial^\mu\phi&lt;/script&gt; with &lt;a href=&quot;http://en.wikipedia.org/wiki/Einstein_notation&quot;&gt;one index raised and one lowered&lt;/a&gt; encodes the metric of &lt;a href=&quot;http://en.wikipedia.org/wiki/Minkowski_space&quot;&gt;Minkowski space&lt;/a&gt;. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can space and time into each other by rotating through an imaginary angle. &lt;/p&gt;
+
+&lt;p&gt;Since the functions being described here are analytic we can &lt;a href=&quot;http://en.wikipedia.org/wiki/Wick_rotation&quot;&gt;&lt;i&gt;rotate into imaginary time&lt;/i&gt;&lt;/a&gt; to do our calculations in euclidean space and then use &lt;a href=&quot;http://en.wikipedia.org/wiki/Analytic_continuation&quot;&gt;analytic continuation&lt;/a&gt; to put our results back into ordinary spacetime.&lt;/p&gt;
+
+&lt;p&gt;But when you rotate into Euclidean space the exponent gets shuffled around:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \int \mathcal{D}\phi e^{-\frac{1}{\hbar}\int dx^4 [\frac{1}{2}\delta^{\mu\nu}\partial_\mu\phi\partial_\nu\phi + \frac{1}{2}m^2\phi^2 + V(\phi)]}
+= \int \mathcal{D}\phi e^{-\frac{1}{\hbar} H[\phi]} &lt;/script&gt;
+
+&lt;p&gt;If you identify &lt;script type=&quot;math/tex&quot;&gt;\beta \leftrightarrow 1/\hbar&lt;/script&gt; this is exactly analogous to the partition function in statistical mechanics. This is an example of a &lt;i&gt;duality&lt;/i&gt;: every problem in quantum field theory has a corresponding problem in statistical mechanics, and vice versa. This greatly expands the variety of techniques at our disposal and has proven to be a powerful tool in physics. In particular the MCMC simulation we used here can be applied to quantum field theories and has been critical to understanding the &lt;a href=&quot;http://en.wikipedia.org/wiki/Lattice_QCD&quot;&gt;nonperturbative aspects of quantum chromodynamics&lt;/a&gt;. But that’s for a future post…&lt;/p&gt;
 
 &lt;h2 id=&quot;links-and-resources&quot;&gt;Links and Resources&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;[1] Source code&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[2] G.P. Lepage, Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://math.arizona.edu/~tgk/541/chap3.pdf&quot;&gt;[2] The Renormalization Group for Ising Spins&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[3] Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>http://blog.stevenkapturowski.com/ising-model</link>

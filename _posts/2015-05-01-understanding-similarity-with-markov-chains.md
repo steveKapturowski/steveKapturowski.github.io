@@ -159,7 +159,7 @@ def truncatedHittingTimes(W, epsilon=.01, T=30):
 
 That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
 
-## References
+## Links and Resources
 
 [D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.](http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf)
 
