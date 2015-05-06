@@ -3,8 +3,8 @@
   <channel>
     <title>Strange Matter - A fledgeling blog about math, machine learning, and black holes</title>
     <description></description>
-    <link>/</link>
-    <atom:link href="/feed.xml" rel="self" type="application/rss+xml" />
+    <link>http://blog.stevenkapturowski.com/</link>
+    <atom:link href="http://blog.stevenkapturowski.com/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
         <title>Understanding Similarity With Markov Chains</title>
@@ -162,8 +162,8 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
-        <link>/understanding-similarity</link>
-        <guid isPermaLink="true">/understanding-similarity</guid>
+        <link>http://blog.stevenkapturowski.com/understanding-similarity</link>
+        <guid isPermaLink="true">http://blog.stevenkapturowski.com/understanding-similarity</guid>
       </item>
     
       <item>
@@ -214,8 +214,8 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
-        <link>/stellar-collapse</link>
-        <guid isPermaLink="true">/stellar-collapse</guid>
+        <link>http://blog.stevenkapturowski.com/stellar-collapse</link>
+        <guid isPermaLink="true">http://blog.stevenkapturowski.com/stellar-collapse</guid>
       </item>
     
       <item>
@@ -226,10 +226,10 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	Your browser does not support the video tag.
 &lt;/video&gt;
 
-&lt;!-- &lt;video width=&quot;300&quot; height=&quot;240&quot; controls&gt;
-  	&lt;source src=&quot;/videos/xy.m4v&quot; type=&quot;video/mp4&quot;&gt;
+&lt;video width=&quot;300&quot; height=&quot;240&quot; controls=&quot;&quot;&gt;
+  	&lt;source src=&quot;/videos/xy.m4v&quot; type=&quot;video/mp4&quot; /&gt;
   	Your browser does not support the video tag.
-&lt;/video&gt; --&gt;
+&lt;/video&gt;
 &lt;/center&gt;
 
 &lt;p&gt;The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.&lt;/p&gt;
@@ -252,13 +252,17 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;h2 id=&quot;a-curious-link-to-quantum-field-theory&quot;&gt;A Curious Link to Quantum Field Theory&lt;/h2&gt;
 
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\partial_\mu\phi\partial^\mu\phi - \frac{1}{2}m^2\phi^2 - V(\phi)]} &lt;/script&gt;
+
 &lt;h2 id=&quot;links-and-resources&quot;&gt;Links and Resources&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;G.P. Lepage, Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
-        <link>/ising-model</link>
-        <guid isPermaLink="true">/ising-model</guid>
+        <link>http://blog.stevenkapturowski.com/ising-model</link>
+        <guid isPermaLink="true">http://blog.stevenkapturowski.com/ising-model</guid>
       </item>
     
       <item>
@@ -266,8 +270,8 @@ We can compute the singular value decomposition on large matrices via the Lanczo
         <description>&lt;p&gt;Coming soon!&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
-        <link>/elliptic-curves</link>
-        <guid isPermaLink="true">/elliptic-curves</guid>
+        <link>http://blog.stevenkapturowski.com/elliptic-curves</link>
+        <guid isPermaLink="true">http://blog.stevenkapturowski.com/elliptic-curves</guid>
       </item>
     
   </channel>
