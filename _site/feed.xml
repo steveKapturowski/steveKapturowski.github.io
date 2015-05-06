@@ -225,11 +225,6 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	&lt;source src=&quot;/videos/ising.m4v&quot; type=&quot;video/mp4&quot; /&gt;
 	Your browser does not support the video tag.
 &lt;/video&gt;
-
-&lt;video width=&quot;300&quot; height=&quot;240&quot; controls=&quot;&quot;&gt;
-  	&lt;source src=&quot;/videos/xy.m4v&quot; type=&quot;video/mp4&quot; /&gt;
-  	Your browser does not support the video tag.
-&lt;/video&gt;
 &lt;/center&gt;
 
 &lt;p&gt;The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.&lt;/p&gt;
@@ -256,9 +251,9 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;h2 id=&quot;links-and-resources&quot;&gt;Links and Resources&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;Source code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;[1] Source code&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;G.P. Lepage, Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[2] G.P. Lepage, Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>http://blog.stevenkapturowski.com/ising-model</link>
