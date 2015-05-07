@@ -99,7 +99,7 @@
   <h1>MCMC, Renormalization, and the Ising Model</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">3 minute read</span>
+  <span class="post-meta small">5 minute read</span>
 </div>
 
 <article class="post-content">
@@ -132,11 +132,48 @@
 
 <script type="math/tex; mode=display"> T_c = \frac{2J}{k \ln(1+\sqrt2)} </script>
 
-<h2 id="detailed-balance-in-markov-chains">Detailed Balance in Markov Chains</h2>
+<h2 id="the-metropolis-algorithm">The Metropolis Algorithm</h2>
 
-<script type="math/tex; mode=display"> \pi_i P_{ij} = \pi_j P_{ji}</script>
+<p>Every physics treatment of this algorithm that I’ve read feels as if it’s described backwards, so I’m going to try doing things a bit differently.</p>
 
-<h2 id="metropolis-algorithm">Metropolis Algorithm</h2>
+<p>The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let <script type="math/tex">P</script> denote the <script type="math/tex">2^Sx2^S</script> transition matrix where <script type="math/tex">S</script> is the number of lattice sites and whose entries <script type="math/tex">P_{AB}</script> represent the probability of transitioning from state <script type="math/tex">A</script> to state <script type="math/tex">B</script>.</p>
+
+<p>A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the <a href="http://en.wikipedia.org/wiki/Detailed_balance"><i>detailed balance</i></a> condition: </p>
+
+<script type="math/tex; mode=display"> \pi_A P_{AB} = \pi_B P_{BA}</script>
+
+<p>where <script type="math/tex">\pi</script> is the probability distribution over states. Since we want <script type="math/tex">\pi</script> to give the partition function, we must have <script type="math/tex">\pi_A = \frac{1}{Z}e^{-\beta E_A}</script>. Thus: </p>
+
+<script type="math/tex; mode=display"> \frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]} </script>
+
+<p>We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let’s define:</p>
+
+<script type="math/tex; mode=display">P_{AB} = \frac{1}{S} \mathcal{A}_{AB}</script>
+
+<script type="math/tex; mode=display">% <![CDATA[
+
+\mathcal{A}_{AB} = \left\{
+     \begin{array}{lr}
+       e^{\beta[E_B-E_A]} & : B < A\\
+       1 & : otherwise
+     \end{array}
+   \right.
+ %]]></script>
+
+<p>for <script type="math/tex">A \neq B</script> being nearest neighbors and <script type="math/tex">0</script> otherwise. Finally, the requirement that <script type="math/tex">P</script> be a stochastic matrix fixes <script type="math/tex">P_{AA} = 1 - \sum_{B \neq A}P_{AB} </script>. </p>
+
+<p>Now that we know all this, we can finally define the <a href="http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm"><i>Metropolis Algorithm</i></a>:</p>
+
+<ol>
+  <li>initialize lattice with some spin configuration <script type="math/tex">\{\sigma\}</script></li>
+  <li>choose <script type="math/tex">\sigma_i</script> uniformly at random (drawing from <script type="math/tex">p(\sigma_i) = \frac{1}{S}</script>)</li>
+  <li>set <script type="math/tex">\sigma_i := - \sigma_i</script> defining the transition <script type="math/tex">A \rightarrow B</script></li>
+  <li>accept new state with probability <script type="math/tex">\mathcal{A}_{AB}</script></li>
+  <li>if new state is rejected reset <script type="math/tex">\sigma_i</script> to its previous state</li>
+  <li>proceed to step (1)</li>
+</ol>
+
+<p>Since the algorithm initializes the spins in an arbitrary configuration there is a certain thermalization time needed before the system actually reaches equilibrium. Once equilibrium <i>is</i> reached we can treat subsequent states as draws from the partition function. We will generally want each draw to be independent from the previous draw. To achieve this we can simply experiment to find a fixed number of iterations between draws for which the correlations are sufficiently close to zero.</p>
 
 <h2 id="a-curious-link-to-quantum-field-theory">A Curious Link to Quantum Field Theory</h2>
 
@@ -146,7 +183,7 @@
 
 <p>Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. </p>
 
-<p>The path integral is essentially a sum over all paths in spacetime. The notation with <script type="math/tex">\partial_\mu\phi\partial^\mu\phi</script> with <a href="http://en.wikipedia.org/wiki/Einstein_notation">one index raised and one lowered</a> encodes the metric of <a href="http://en.wikipedia.org/wiki/Minkowski_space">Minkowski space</a>. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can space and time into each other by rotating through an imaginary angle. </p>
+<p>The path integral is essentially a sum over all paths in spacetime. The notation with <script type="math/tex">\partial_\mu\phi\partial^\mu\phi</script> with <a href="http://en.wikipedia.org/wiki/Einstein_notation">one index raised and one lowered</a> encodes the metric of <a href="http://en.wikipedia.org/wiki/Minkowski_space">Minkowski space</a>. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. </p>
 
 <p>Since the functions being described here are analytic we can <a href="http://en.wikipedia.org/wiki/Wick_rotation"><i>rotate into imaginary time</i></a> to do our calculations in euclidean space and then use <a href="http://en.wikipedia.org/wiki/Analytic_continuation">analytic continuation</a> to put our results back into ordinary spacetime.</p>
 

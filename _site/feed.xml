@@ -249,11 +249,48 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; T_c = \frac{2J}{k \ln(1+\sqrt2)} &lt;/script&gt;
 
-&lt;h2 id=&quot;detailed-balance-in-markov-chains&quot;&gt;Detailed Balance in Markov Chains&lt;/h2&gt;
+&lt;h2 id=&quot;the-metropolis-algorithm&quot;&gt;The Metropolis Algorithm&lt;/h2&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_i P_{ij} = \pi_j P_{ji}&lt;/script&gt;
+&lt;p&gt;Every physics treatment of this algorithm that I’ve read feels as if it’s described backwards, so I’m going to try doing things a bit differently.&lt;/p&gt;
 
-&lt;h2 id=&quot;metropolis-algorithm&quot;&gt;Metropolis Algorithm&lt;/h2&gt;
+&lt;p&gt;The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt; denote the &lt;script type=&quot;math/tex&quot;&gt;2^Sx2^S&lt;/script&gt; transition matrix where &lt;script type=&quot;math/tex&quot;&gt;S&lt;/script&gt; is the number of lattice sites and whose entries &lt;script type=&quot;math/tex&quot;&gt;P_{AB}&lt;/script&gt; represent the probability of transitioning from state &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; to state &lt;script type=&quot;math/tex&quot;&gt;B&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;A &lt;i&gt;sufficient&lt;/i&gt;, but not &lt;i&gt;necessary&lt;/i&gt;, condition for the Markov chain to be in equilibrium is for it to satisfy the &lt;a href=&quot;http://en.wikipedia.org/wiki/Detailed_balance&quot;&gt;&lt;i&gt;detailed balance&lt;/i&gt;&lt;/a&gt; condition: &lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \pi_A P_{AB} = \pi_B P_{BA}&lt;/script&gt;
+
+&lt;p&gt;where &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; is the probability distribution over states. Since we want &lt;script type=&quot;math/tex&quot;&gt;\pi&lt;/script&gt; to give the partition function, we must have &lt;script type=&quot;math/tex&quot;&gt;\pi_A = \frac{1}{Z}e^{-\beta E_A}&lt;/script&gt;. Thus: &lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]} &lt;/script&gt;
+
+&lt;p&gt;We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let’s define:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;P_{AB} = \frac{1}{S} \mathcal{A}_{AB}&lt;/script&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+
+\mathcal{A}_{AB} = \left\{
+     \begin{array}{lr}
+       e^{\beta[E_B-E_A]} &amp; : B &lt; A\\
+       1 &amp; : otherwise
+     \end{array}
+   \right.
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;for &lt;script type=&quot;math/tex&quot;&gt;A \neq B&lt;/script&gt; being nearest neighbors and &lt;script type=&quot;math/tex&quot;&gt;0&lt;/script&gt; otherwise. Finally, the requirement that &lt;script type=&quot;math/tex&quot;&gt;P&lt;/script&gt; be a stochastic matrix fixes &lt;script type=&quot;math/tex&quot;&gt;P_{AA} = 1 - \sum_{B \neq A}P_{AB} &lt;/script&gt;. &lt;/p&gt;
+
+&lt;p&gt;Now that we know all this, we can finally define the &lt;a href=&quot;http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm&quot;&gt;&lt;i&gt;Metropolis Algorithm&lt;/i&gt;&lt;/a&gt;:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;initialize lattice with some spin configuration &lt;script type=&quot;math/tex&quot;&gt;\{\sigma\}&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;choose &lt;script type=&quot;math/tex&quot;&gt;\sigma_i&lt;/script&gt; uniformly at random (drawing from &lt;script type=&quot;math/tex&quot;&gt;p(\sigma_i) = \frac{1}{S}&lt;/script&gt;)&lt;/li&gt;
+  &lt;li&gt;set &lt;script type=&quot;math/tex&quot;&gt;\sigma_i := - \sigma_i&lt;/script&gt; defining the transition &lt;script type=&quot;math/tex&quot;&gt;A \rightarrow B&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;accept new state with probability &lt;script type=&quot;math/tex&quot;&gt;\mathcal{A}_{AB}&lt;/script&gt;&lt;/li&gt;
+  &lt;li&gt;if new state is rejected reset &lt;script type=&quot;math/tex&quot;&gt;\sigma_i&lt;/script&gt; to its previous state&lt;/li&gt;
+  &lt;li&gt;proceed to step (1)&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;Since the algorithm initializes the spins in an arbitrary configuration there is a certain thermalization time needed before the system actually reaches equilibrium. Once equilibrium &lt;i&gt;is&lt;/i&gt; reached we can treat subsequent states as draws from the partition function. We will generally want each draw to be independent from the previous draw. To achieve this we can simply experiment to find a fixed number of iterations between draws for which the correlations are sufficiently close to zero.&lt;/p&gt;
 
 &lt;h2 id=&quot;a-curious-link-to-quantum-field-theory&quot;&gt;A Curious Link to Quantum Field Theory&lt;/h2&gt;
 
@@ -263,7 +300,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. &lt;/p&gt;
 
-&lt;p&gt;The path integral is essentially a sum over all paths in spacetime. The notation with &lt;script type=&quot;math/tex&quot;&gt;\partial_\mu\phi\partial^\mu\phi&lt;/script&gt; with &lt;a href=&quot;http://en.wikipedia.org/wiki/Einstein_notation&quot;&gt;one index raised and one lowered&lt;/a&gt; encodes the metric of &lt;a href=&quot;http://en.wikipedia.org/wiki/Minkowski_space&quot;&gt;Minkowski space&lt;/a&gt;. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can space and time into each other by rotating through an imaginary angle. &lt;/p&gt;
+&lt;p&gt;The path integral is essentially a sum over all paths in spacetime. The notation with &lt;script type=&quot;math/tex&quot;&gt;\partial_\mu\phi\partial^\mu\phi&lt;/script&gt; with &lt;a href=&quot;http://en.wikipedia.org/wiki/Einstein_notation&quot;&gt;one index raised and one lowered&lt;/a&gt; encodes the metric of &lt;a href=&quot;http://en.wikipedia.org/wiki/Minkowski_space&quot;&gt;Minkowski space&lt;/a&gt;. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. &lt;/p&gt;
 
 &lt;p&gt;Since the functions being described here are analytic we can &lt;a href=&quot;http://en.wikipedia.org/wiki/Wick_rotation&quot;&gt;&lt;i&gt;rotate into imaginary time&lt;/i&gt;&lt;/a&gt; to do our calculations in euclidean space and then use &lt;a href=&quot;http://en.wikipedia.org/wiki/Analytic_continuation&quot;&gt;analytic continuation&lt;/a&gt; to put our results back into ordinary spacetime.&lt;/p&gt;
 

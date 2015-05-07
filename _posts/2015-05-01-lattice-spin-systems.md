@@ -39,11 +39,45 @@ As it turns out, the Ising Model in two dimensions has a phase transition.
 
 $$ T_c = \frac{2J}{k \ln(1+\sqrt2)} $$
 
-## Detailed Balance in Markov Chains
+## The Metropolis Algorithm
 
-$$ \pi_i P_{ij} = \pi_j P_{ji}$$ 
+Every physics treatment of this algorithm that I've read feels as if it's described backwards, so I'm going to try doing things a bit differently.
 
-## Metropolis Algorithm
+The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let $$P$$ denote the $$2^Sx2^S$$ transition matrix where $$S$$ is the number of lattice sites and whose entries $$P_{AB}$$ represent the probability of transitioning from state $$A$$ to state $$B$$.
+
+A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the [<i>detailed balance</i>](http://en.wikipedia.org/wiki/Detailed_balance) condition: 
+
+$$ \pi_A P_{AB} = \pi_B P_{BA}$$
+
+where $$\pi$$ is the probability distribution over states. Since we want $$\pi$$ to give the partition function, we must have $$\pi_A = \frac{1}{Z}e^{-\beta E_A}$$. Thus: 
+
+$$ \frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]} $$
+
+We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let's define:
+
+$$P_{AB} = \frac{1}{S} \mathcal{A}_{AB}$$
+
+$$
+\mathcal{A}_{AB} = \left\{
+     \begin{array}{lr}
+       e^{\beta[E_B-E_A]} & : B < A\\
+       1 & : otherwise
+     \end{array}
+   \right.
+$$
+
+for $$A \neq B$$ being nearest neighbors and $$0$$ otherwise. Finally, the requirement that $$P$$ be a stochastic matrix fixes $$P_{AA} = 1 - \sum_{B \neq A}P_{AB} $$. 
+
+Now that we know all this, we can finally define the [<i>Metropolis Algorithm</i>](http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm):
+
+0. initialize lattice with some spin configuration $$\{\sigma\}$$
+1. choose $$\sigma_i$$ uniformly at random (drawing from $$p(\sigma_i) = \frac{1}{S}$$)
+2. set $$\sigma_i := - \sigma_i$$ defining the transition $$A \rightarrow B$$
+3. accept new state with probability $$\mathcal{A}_{AB}$$
+4. if new state is rejected reset $$\sigma_i$$ to its previous state
+5. proceed to step (1)
+
+Since the algorithm initializes the spins in an arbitrary configuration there is a certain thermalization time needed before the system actually reaches equilibrium. Once equilibrium <i>is</i> reached we can treat subsequent states as draws from the partition function. We will generally want each draw to be independent from the previous draw. To achieve this we can simply experiment to find a fixed number of iterations between draws for which the correlations are sufficiently close to zero.
 
 ## A Curious Link to Quantum Field Theory
 
@@ -53,7 +87,7 @@ $$ Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\frac{1}{2}\partial_\mu\phi
 
 Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. 
 
-The path integral is essentially a sum over all paths in spacetime. The notation with $$\partial_\mu\phi\partial^\mu\phi$$ with [one index raised and one lowered](http://en.wikipedia.org/wiki/Einstein_notation) encodes the metric of [Minkowski space](http://en.wikipedia.org/wiki/Minkowski_space). Described using this geometry the physics of special relativity essentially all boils down to the fact that you can space and time into each other by rotating through an imaginary angle. 
+The path integral is essentially a sum over all paths in spacetime. The notation with $$\partial_\mu\phi\partial^\mu\phi$$ with [one index raised and one lowered](http://en.wikipedia.org/wiki/Einstein_notation) encodes the metric of [Minkowski space](http://en.wikipedia.org/wiki/Minkowski_space). Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. 
 
 Since the functions being described here are analytic we can [<i>rotate into imaginary time</i>](http://en.wikipedia.org/wiki/Wick_rotation) to do our calculations in euclidean space and then use [analytic continuation](http://en.wikipedia.org/wiki/Analytic_continuation) to put our results back into ordinary spacetime.
 
