@@ -229,23 +229,62 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.&lt;/p&gt;
 
-&lt;h2 id=&quot;solving-the-ising-model-in-2d&quot;&gt;Solving the Ising Model in 2D&lt;/h2&gt;
+&lt;h2 id=&quot;solving-the-ising-model-in-1d&quot;&gt;Solving the Ising Model in 1D&lt;/h2&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; H = -\sum J_{ij}\sigma_i\sigma_j - \mu\sum h_j\sigma_j &lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; H = -\sum K_{ij}\sigma_i\sigma_j - \mu\sum J_i\sigma_i &lt;/script&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \sum_{\{\sigma\}} e^{-\beta H}&lt;/script&gt;
 
-&lt;p&gt;This is just a simple algebraic equation, so in principle it tells us everything about the statistics mechanics of the system. The problem is that the number of terms in the sum is exponential in the number of states &lt;script type=&quot;math/tex&quot;&gt;\sigma&lt;/script&gt;. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we’ll do both.&lt;/p&gt;
+&lt;p&gt;As it turns out we have very nice formulas for energy, specific heat, magnetization, and susceptibility respectively: &lt;script type=&quot;math/tex&quot;&gt;E = -\frac{\partial\ln Z}{\partial \beta} &lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;c_v = k\beta^2 \frac{\partial^2\ln Z}{\partial \beta^2}&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;M = -\frac{\partial\ln Z}{\partial J} \biggr\rvert_{J=0}&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;\chi = -\frac{\partial^2\ln Z}{\partial J^2} \biggr\rvert_{J=0}&lt;/script&gt;as well as the correlation functions, all in terms of the partition function &lt;script type=&quot;math/tex&quot;&gt;Z&lt;/script&gt;. So, in principle, if we know the partition function, we know &lt;i&gt;everything&lt;/i&gt;&lt;/p&gt;
+
+&lt;p&gt;The problem is that the number of terms in the sum is exponential in the number of states &lt;script type=&quot;math/tex&quot;&gt;\sigma&lt;/script&gt;. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we’ll do both.&lt;/p&gt;
 
 &lt;p&gt;Let’s start with (1):&lt;/p&gt;
 
-&lt;p&gt;Let N be the length of the lattice in each direction and assume periodic boundary conditions such that &lt;script type=&quot;math/tex&quot;&gt;\sigma_{Nj}&lt;/script&gt; neighbors &lt;script type=&quot;math/tex&quot;&gt;\sigma_{1j}&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\sigma_{iN}&lt;/script&gt; neighbors &lt;script type=&quot;math/tex&quot;&gt;\sigma_{i1}&lt;/script&gt;. For simplicity let’s also turn off the external magnetic field (&lt;script type=&quot;math/tex&quot;&gt;h=0&lt;/script&gt;). Bringing the sum in the exponential down into a product of exponentials and using the relation &lt;script type=&quot;math/tex&quot;&gt;e^{lK} = \cosh(x) + l\sinh(K)&lt;/script&gt; for &lt;script type=&quot;math/tex&quot;&gt;l = \pm 1&lt;/script&gt; we have:&lt;/p&gt;
+&lt;p&gt;Let N be the length of the lattice in each direction and assume periodic boundary conditions such that &lt;script type=&quot;math/tex&quot;&gt;\sigma_{N}&lt;/script&gt; neighbors &lt;script type=&quot;math/tex&quot;&gt;\sigma_{1}&lt;/script&gt;. For simplicity let’s also turn off the external magnetic field (&lt;script type=&quot;math/tex&quot;&gt;h=0&lt;/script&gt;). &lt;/p&gt;
 
-&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z= \sum_{\{\sigma\}} \prod_{\langle i,j\rangle} e^{\beta J \sigma_i\sigma_j} = \cosh(\beta J)^{2N^2} \sum \prod (1+\sigma_i \sigma_j \tanh(\beta J))&lt;/script&gt;
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}&lt;/script&gt;
+
+&lt;p&gt;Defining the &lt;i&gt;transfer matrix&lt;/i&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+ T_{\sigma_k \sigma_{k+1}} =
+\begin{bmatrix}
+    e^K    &amp; e^{-K} \\
+    e^{-K} &amp; e^K \\
+\end{bmatrix}
+ %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;we can rewrite the partition function as follows:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = \mbox{Tr}T^N = \lambda_1^N + \lambda_2^N &lt;/script&gt;
+
+&lt;p&gt;Diagonalizing &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; we find eigenvalues &lt;script type=&quot;math/tex&quot;&gt;\lambda_1 = 2\cosh K&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;\lambda_2 = 2\sinh K&lt;/script&gt;&lt;/p&gt;
+
+&lt;p&gt;So we end up with the particularly simple form:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; Z = (2\cosh K)^N + (2\sinh K)^N &lt;/script&gt;
 
 &lt;h2 id=&quot;criticality&quot;&gt;Criticality&lt;/h2&gt;
 
-&lt;p&gt;As it turns out, the Ising Model in two dimensions has a phase transition.&lt;/p&gt;
+&lt;p&gt;The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won’t endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called &lt;a href=&quot;http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality&quot;&gt;Kramers-Wannier Duality&lt;/a&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt; \sum_{\{P\}} \tanh(\beta \hat{K})^{L(P)} = \sum_{\{P\}} e^{-2\beta K L(P)}
+&lt;/script&gt;
+
+&lt;p&gt;Where the sums are over all (possibly disconnected) domain wall paths and &lt;script type=&quot;math/tex&quot;&gt;L(P)&lt;/script&gt; is the length of the path. Equating the sums term-by-term we find a mapping between high temperatures and low temperatures:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\tanh(\beta \hat{K}) \leftrightarrow e^{-2\beta K}&lt;/script&gt;
+
+&lt;p&gt;Under this mapping critical points must be mapped to critical points; so under the assumption that the system contains only one phase transition, &lt;i&gt;it must be mapped to itself&lt;/i&gt;. Thus:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\sinh(2K_c) = 1&lt;/script&gt;
+
+&lt;p&gt;Manipulating the sinh term we get a polynomial in &lt;script type=&quot;math/tex&quot;&gt;\chi = e^{2K_c}&lt;/script&gt;:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;2\chi - \chi^2 - 1 = 0&lt;/script&gt;
+
+&lt;p&gt;Finally we end up with a critical temperature at:&lt;/p&gt;
 
 &lt;script type=&quot;math/tex; mode=display&quot;&gt; T_c = \frac{2J}{k \ln(1+\sqrt2)} &lt;/script&gt;
 
@@ -300,7 +339,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. &lt;/p&gt;
 
-&lt;p&gt;The path integral is essentially a sum over all paths in spacetime. The notation with &lt;script type=&quot;math/tex&quot;&gt;\partial_\mu\phi\partial^\mu\phi&lt;/script&gt; with &lt;a href=&quot;http://en.wikipedia.org/wiki/Einstein_notation&quot;&gt;one index raised and one lowered&lt;/a&gt; encodes the metric of &lt;a href=&quot;http://en.wikipedia.org/wiki/Minkowski_space&quot;&gt;Minkowski space&lt;/a&gt;. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. &lt;/p&gt;
+&lt;p&gt;The path integral is essentially a sum over all paths in spacetime. The notation of &lt;script type=&quot;math/tex&quot;&gt;\partial_\mu\phi\partial^\mu\phi&lt;/script&gt; with &lt;a href=&quot;http://en.wikipedia.org/wiki/Einstein_notation&quot;&gt;one index raised and one lowered&lt;/a&gt; encodes the metric of &lt;a href=&quot;http://en.wikipedia.org/wiki/Minkowski_space&quot;&gt;Minkowski space&lt;/a&gt;. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. &lt;/p&gt;
 
 &lt;p&gt;Since the functions being described here are analytic we can &lt;a href=&quot;http://en.wikipedia.org/wiki/Wick_rotation&quot;&gt;&lt;i&gt;rotate into imaginary time&lt;/i&gt;&lt;/a&gt; to do our calculations in euclidean space and then use &lt;a href=&quot;http://en.wikipedia.org/wiki/Analytic_continuation&quot;&gt;analytic continuation&lt;/a&gt; to put our results back into ordinary spacetime.&lt;/p&gt;
 
@@ -315,9 +354,11 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;[1] Source code&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://math.arizona.edu/~tgk/541/chap3.pdf&quot;&gt;[2] The Renormalization Group for Ising Spins&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://micro.stanford.edu/~caiwei/me334/Chap12_Ising_Model_v04.pdf&quot;&gt;[2] Stanford Handout on the Ising Model&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[3] Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://math.arizona.edu/~tgk/541/chap3.pdf&quot;&gt;[3] The Renormalization Group for Ising Spins&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[4] Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Fri, 01 May 2015 00:00:00 -0600</pubDate>
         <link>http://blog.stevenkapturowski.com/ising-model</link>

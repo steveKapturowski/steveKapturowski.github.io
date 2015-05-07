@@ -15,27 +15,61 @@ permalink: ising-model
 
 The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.
 
-## Solving the Ising Model in 2D
+## Solving the Ising Model in 1D
 
-$$ H = -\sum J_{ij}\sigma_i\sigma_j - \mu\sum h_j\sigma_j $$
+$$ H = -\sum K_{ij}\sigma_i\sigma_j - \mu\sum J_i\sigma_i $$
 
 $$ Z = \sum_{\{\sigma\}} e^{-\beta H}$$
 
-This is just a simple algebraic equation, so in principle it tells us everything about the statistics mechanics of the system. The problem is that the number of terms in the sum is exponential in the number of states $$\sigma$$. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we'll do both.
+As it turns out we have very nice formulas for energy, specific heat, magnetization, and susceptibility respectively: $$E = -\frac{\partial\ln Z}{\partial \beta} $$, $$c_v = k\beta^2 \frac{\partial^2\ln Z}{\partial \beta^2}$$, $$M = -\frac{\partial\ln Z}{\partial J} \biggr\rvert_{J=0}$$, and $$\chi = -\frac{\partial^2\ln Z}{\partial J^2} \biggr\rvert_{J=0}$$as well as the correlation functions, all in terms of the partition function $$Z$$. So, in principle, if we know the partition function, we know <i>everything</i>
+
+The problem is that the number of terms in the sum is exponential in the number of states $$\sigma$$. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we'll do both.
 
 Let's start with (1):
 
-Let N be the length of the lattice in each direction and assume periodic boundary conditions such that $$\sigma_{Nj}$$ neighbors $$\sigma_{1j}$$ and $$\sigma_{iN}$$ neighbors $$\sigma_{i1}$$. For simplicity let's also turn off the external magnetic field ($$h=0$$). Bringing the sum in the exponential down into a product of exponentials and using the relation $$e^{lK} = \cosh(x) + l\sinh(K)$$ for $$l = \pm 1$$ we have:
+Let N be the length of the lattice in each direction and assume periodic boundary conditions such that $$\sigma_{N}$$ neighbors $$\sigma_{1}$$. For simplicity let's also turn off the external magnetic field ($$h=0$$). 
 
-$$ Z= \sum_{\{\sigma\}} \prod_{\langle i,j\rangle} e^{\beta J \sigma_i\sigma_j} = \cosh(\beta J)^{2N^2} \sum \prod (1+\sigma_i \sigma_j \tanh(\beta J))$$ 
+$$Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}$$
 
+Defining the <i>transfer matrix</i>:
 
+$$ T_{\sigma_k \sigma_{k+1}} =
+\begin{bmatrix}
+    e^K    & e^{-K} \\
+    e^{-K} & e^K \\
+\end{bmatrix}
+$$
 
+we can rewrite the partition function as follows:
 
+$$ Z = \mbox{Tr}T^N = \lambda_1^N + \lambda_2^N $$
+
+Diagonalizing $$T$$ we find eigenvalues $$\lambda_1 = 2\cosh K$$ and $$\lambda_2 = 2\sinh K$$
+
+So we end up with the particularly simple form:
+
+$$ Z = (2\cosh K)^N + (2\sinh K)^N $$
 
 ## Criticality
 
-As it turns out, the Ising Model in two dimensions has a phase transition.
+The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won't endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called [Kramers-Wannier Duality](http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality):
+
+$$ \sum_{\{P\}} \tanh(\beta \hat{K})^{L(P)} = \sum_{\{P\}} e^{-2\beta K L(P)}
+$$
+
+Where the sums are over all (possibly disconnected) domain wall paths and $$L(P)$$ is the length of the path. Equating the sums term-by-term we find a mapping between high temperatures and low temperatures:
+
+$$\tanh(\beta \hat{K}) \leftrightarrow e^{-2\beta K}$$
+
+Under this mapping critical points must be mapped to critical points; so under the assumption that the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus:
+
+$$\sinh(2K_c) = 1$$
+
+Manipulating the sinh term we get a polynomial in $$\chi = e^{2K_c}$$:
+
+$$2\chi - \chi^2 - 1 = 0$$
+
+Finally we end up with a critical temperature at:
 
 $$ T_c = \frac{2J}{k \ln(1+\sqrt2)} $$
 
@@ -87,7 +121,7 @@ $$ Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\frac{1}{2}\partial_\mu\phi
 
 Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. 
 
-The path integral is essentially a sum over all paths in spacetime. The notation with $$\partial_\mu\phi\partial^\mu\phi$$ with [one index raised and one lowered](http://en.wikipedia.org/wiki/Einstein_notation) encodes the metric of [Minkowski space](http://en.wikipedia.org/wiki/Minkowski_space). Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. 
+The path integral is essentially a sum over all paths in spacetime. The notation of $$\partial_\mu\phi\partial^\mu\phi$$ with [one index raised and one lowered](http://en.wikipedia.org/wiki/Einstein_notation) encodes the metric of [Minkowski space](http://en.wikipedia.org/wiki/Minkowski_space). Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. 
 
 Since the functions being described here are analytic we can [<i>rotate into imaginary time</i>](http://en.wikipedia.org/wiki/Wick_rotation) to do our calculations in euclidean space and then use [analytic continuation](http://en.wikipedia.org/wiki/Analytic_continuation) to put our results back into ordinary spacetime.
 
@@ -102,6 +136,8 @@ If you identify $$\beta \leftrightarrow 1/\hbar$$ this is exactly analogous to t
 
 [[1] Source code](https://github.com/steveKapturowski/QFT_Project)
 
-[[2] The Renormalization Group for Ising Spins](http://math.arizona.edu/~tgk/541/chap3.pdf)
+[[2] Stanford Handout on the Ising Model](http://micro.stanford.edu/~caiwei/me334/Chap12_Ising_Model_v04.pdf)
 
-[[3] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)
+[[3] The Renormalization Group for Ising Spins](http://math.arizona.edu/~tgk/541/chap3.pdf)
+
+[[4] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)
