@@ -31,7 +31,7 @@ Let N be the length of the lattice in each direction and assume periodic boundar
 
 $$Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}$$
 
-Defining the <i>transfer matrix</i>:
+Where $$K = \beta J$$. Defining the <i>transfer matrix</i>:
 
 $$ T_{\sigma_k \sigma_{k+1}} =
 \begin{bmatrix}
@@ -50,34 +50,91 @@ So we end up with the particularly simple form:
 
 $$ Z = (2\cosh K)^N + (2\sinh K)^N $$
 
-## Criticality
+## Thermodynamic Limit
 
-The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won't endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called [Kramers-Wannier Duality](http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality):
+The abrubt changes in thermodynamic properties observed in phase transitions appears to be at odds with a description in terms of analytic functions. After all, the partition function is nothing more than a finite sum of exponentials. 
 
-$$ \sum_{\{P\}} \tanh(\beta \hat{K})^{L(P)} = \sum_{\{P\}} e^{-2\beta K L(P)}
-$$
+Being that $$e^x$$ is everywhere analytic and realizing that a finite sum of analytic functions is itself analytic the partition function might at first seem hopelessly incapable of describing the physics of phase transitions. But <i>critically</i> (what a pun!), an <i>infinite</i> sum of analytic functions need not be analytic. A familiar example comes from Fourier Series where we find that an infinite number of sine waves can add up to a square wave:
 
-Where the sums are over all (possibly disconnected) domain wall paths and $$L(P)$$ is the length of the path. Equating the sums term-by-term we find a mapping between high temperatures and low temperatures:
+{% include fourier.html %}
 
-$$\tanh(\beta \hat{K}) \leftrightarrow e^{-2\beta K}$$
+Typically we are not interested in small lattice sizes and want to know what the behavior looks like in macroscopic systems. Defining an intrinsic quantity $$\,f = \frac{1}{N\beta}\ln Z$$ called the <i>free energy per spin</i>, we can take a well-defined limit as the number of sites goes to infinity. For our 1D solution:
 
-Under this mapping critical points must be mapped to critical points; so under the assumption that the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus:
+$$\lim_{N \rightarrow \infty}f = \ln2 + \ln \cosh K$$
 
-$$\sinh(2K_c) = 1$$
+Which is completely smooth. No phase transition in 1D. It seems we'll have to try something more complicated if we are to capture our elusive prey.
 
-Manipulating the sinh term we get a polynomial in $$\chi = e^{2K_c}$$:
+([Leonard Susskind give's a very intuite explanation on why a phase transition cannot occur in 1D, making analogy with the game of telephone](https://www.youtube.com/watch?v=AT4_S9vQJgc))
 
-$$2\chi - \chi^2 - 1 = 0$$
+## Criticality in 2D
 
-Finally we end up with a critical temperature at:
+The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won't endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called [<i>Kramers-Wannier Duality</i>](http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality). Nevertheless, a certain amount of pain must be endured, so if you're more algorithmically minded feel free to make a cowardly break for the next section.
+
+To begin we rewrite the partition function as
+
+$$ Z = \cosh(K)^N Z^\prime $$
+
+$$ Z^\prime = \sum_{\{\sigma\}} \prod_{\langle i,j \rangle} [1 + \sigma_i \sigma_j \tanh(K)]$$
+
+using the fact that $$e^{\pm x} = \cosh(x)[1 \pm \tanh(x)] $$. We can keep track of the terms combinitorically by matching the $$\sigma_i \sigma_j \tanh(K)$$ terms up to edges in a subgraph $$P$$ of the lattice:
+
+$$ Z^\prime = \sum_{\{P\}} \prod_{\langle i,j \rangle \in P} \sigma_i \sigma_j tanh(K)$$
+
+Consider a subgraph consisting of a single non-self-intersecting path and let $$P(k)$$ denote the $$k$$th site along the path: 
+
+<center>
+	<img src="/images/kramers-wannier-duality-002.png" height="200" width="200">
+</center>
+
+$$ \sum_{\{\sigma\}} \sigma_{i} \sigma_{P(1)}^2 \sigma_{P(2)}^2 \ldots \sigma_{P(L-1)}^2 \sigma_{f} = 0$$
+
+<i>unless</i> $$P(0) = P(L)$$, i.e.: $$P$$ is a closed path. More generally, we can use this same idea to prove that the only link configurations that contribute to the partition function are those that form <i>even subgraphs</i>. Using this fact we can further simplify $$Z^\prime$$:
+
+$$ Z^\prime = \sum_{l=0}^{2S} c(l) \tanh(K)^l $$
+
+where $$c(l)$$ counts the number of even subgraphs with length $$l$$. This is one half of the duality, usually referred to as the <i>high temperature expansion</i>.
+
+Now, consider the <i>dual</i> lattice whose sites sit in the squares of the original lattice and whose neighbors are those squares it shares an edge with. When we use periodic boundary conditions the lattice forms a torus, and in fact the dual lattice forms an identical torus!
+
+Given an even subgraph on the original lattice there exists a two-to-one correspondence with spin configurations on the dual lattice:
+
+<center>
+	<img src="/images/kramers-wannier-duality-001.png" height="200" width="500">
+</center>
+
+At least, that is <i>almost</i> true. In fact the correspondence breaks down for certain subgraphs which wrap completely around the torus, but these terms contribute negligbly to the summation and will go to zero in the thermodynamic limit.
+
+At low energy all of the spins in the dual lattice will be lined up, so the ground state energy is $$H_0 = -KN$$. Thus, we can rewrite the original Hamiltonian as: 
+
+$$H = H_0 + \sum_{\sigma_i \neq \sigma_j \vert \langle i,j \rangle} 2K$$ 
+
+Here the summation is only over the links connecting sites of differing spin, which occur precisely across each of the edges present in the subgraphs of the high temperature expansion; each edge lifing the energy by $$2K$$. Note that the energy of a configuration again depends <i>only</i> on the number of edges in the subgraph. This allows us to write the partition function in a suggestively familiar form:
+
+$$ \hat{Z} = 2e^{\hat{K}N}\sum_{l=0}^{2N} c(l)e^{-2\hat{K}l} $$
+
+where the factor of 2 out front comes from the two-to-one correspondence between the dual lattice and even subgraphs on the original lattice. Behold: the <i>low temperature expansion</i>! 
+
+As we take $$N \rightarrow \infty$$ both expansions must be identical under the identification $$\tanh(K) \leftrightarrow e^{-2\hat{K}}$$:
+
+$$ \frac{\hat{Z}}{2e^{\hat{K}N}} = \frac{Z}{\cosh(K)^N} = \sum_{l} c(l)e^{-2\hat{K}l} = \sum_{l} c(l) \tanh(K)^l$$
+
+This identification defines a mapping between high temperature and low temperature which preserves analytic behavior. Since critical points are <i>defined</i> by nonanalyticity, critical points must be mapped to critical points. 
+
+If we assume the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus $$K_c$$ occurs when $$K=\hat{K}$$, and manipulating the tanh term we get a polynomial in $$\chi = e^{2K_c}$$:
+
+$$\chi^2 - 2\chi - 1 = 0$$
+
+Solving this we find the critical temperature
 
 $$ T_c = \frac{2J}{k \ln(1+\sqrt2)} $$
+
+and can now go to sleep. . .But ho! I am not through with you yet:
 
 ## The Metropolis Algorithm
 
 Every physics treatment of this algorithm that I've read feels as if it's described backwards, so I'm going to try doing things a bit differently.
 
-The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let $$P$$ denote the $$2^Sx2^S$$ transition matrix where $$S$$ is the number of lattice sites and whose entries $$P_{AB}$$ represent the probability of transitioning from state $$A$$ to state $$B$$.
+The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let $$P$$ denote the $$2^Nx2^N$$ transition matrix whose entries $$P_{AB}$$ represent the probability of transitioning from state $$A$$ to state $$B$$.
 
 A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the [<i>detailed balance</i>](http://en.wikipedia.org/wiki/Detailed_balance) condition: 
 
@@ -89,7 +146,7 @@ $$ \frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]} $$
 
 We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let's define:
 
-$$P_{AB} = \frac{1}{S} \mathcal{A}_{AB}$$
+$$P_{AB} = \frac{1}{N} \mathcal{A}_{AB}$$
 
 $$
 \mathcal{A}_{AB} = \left\{
@@ -105,7 +162,7 @@ for $$A \neq B$$ being nearest neighbors and $$0$$ otherwise. Finally, the requi
 Now that we know all this, we can finally define the [<i>Metropolis Algorithm</i>](http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm):
 
 0. initialize lattice with some spin configuration $$\{\sigma\}$$
-1. choose $$\sigma_i$$ uniformly at random (drawing from $$p(\sigma_i) = \frac{1}{S}$$)
+1. choose $$\sigma_i$$ uniformly at random (drawing from $$p(\sigma_i) = \frac{1}{N}$$)
 2. set $$\sigma_i := - \sigma_i$$ defining the transition $$A \rightarrow B$$
 3. accept new state with probability $$\mathcal{A}_{AB}$$
 4. if new state is rejected reset $$\sigma_i$$ to its previous state
@@ -140,4 +197,6 @@ If you identify $$\beta \leftrightarrow 1/\hbar$$ this is exactly analogous to t
 
 [[3] The Renormalization Group for Ising Spins](http://math.arizona.edu/~tgk/541/chap3.pdf)
 
-[[4] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)
+[[4] Exact Solution of the 2D Ising Model](http://www.peliti.org/Notes/ising2/vdov.html)
+
+[[5] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)

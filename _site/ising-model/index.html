@@ -99,7 +99,7 @@
   <h1>MCMC, Renormalization, and the Ising Model</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">7 minute read</span>
+  <span class="post-meta small">14 minute read</span>
 </div>
 
 <article class="post-content">
@@ -128,7 +128,7 @@
 
 <script type="math/tex; mode=display">Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}</script>
 
-<p>Defining the <i>transfer matrix</i>:</p>
+<p>Where <script type="math/tex">K = \beta J</script>. Defining the <i>transfer matrix</i>:</p>
 
 <script type="math/tex; mode=display">% <![CDATA[
  T_{\sigma_k \sigma_{k+1}} =
@@ -148,34 +148,303 @@
 
 <script type="math/tex; mode=display"> Z = (2\cosh K)^N + (2\sinh K)^N </script>
 
-<h2 id="criticality">Criticality</h2>
+<h2 id="thermodynamic-limit">Thermodynamic Limit</h2>
 
-<p>The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won’t endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called <a href="http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality">Kramers-Wannier Duality</a>:</p>
+<p>The abrubt changes in thermodynamic properties observed in phase transitions appears to be at odds with a description in terms of analytic functions. After all, the partition function is nothing more than a finite sum of exponentials. </p>
 
-<script type="math/tex; mode=display"> \sum_{\{P\}} \tanh(\beta \hat{K})^{L(P)} = \sum_{\{P\}} e^{-2\beta K L(P)}
+<p>Being that <script type="math/tex">e^x</script> is everywhere analytic and realizing that a finite sum of analytic functions is itself analytic the partition function might at first seem hopelessly incapable of describing the physics of phase transitions. But <i>critically</i> (what a pun!), an <i>infinite</i> sum of analytic functions need not be analytic. A familiar example comes from Fourier Series where we find that an infinite number of sine waves can add up to a square wave:</p>
+
+<center>
+<div id="canvas-container" style="width: 800px; height: 300px;">
+    <canvas id="sineCanvas" style="width: 800px; height: 300px;" width="800" height="300"></canvas>
+</div>
+</center>
+
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js?2.6.0"></script>
+
+<script type="text/javascript" src="jwerty.js"></script>
+
+<script type="text/javascript">
+(function () {
+
+if (typeof(Humble) == 'undefined') window.Humble = {};
+Humble.Trig = {};
+Humble.Trig.init = init;
+
+var unit = 100,
+    canvas, context, canvas2, context2,
+    height, width, xAxis, yAxis,
+    draw;
+
+/**
+ * Init function.
+ * 
+ * Initialize variables and begin the animation.
+ */
+function init() {
+    
+    canvas = document.getElementById("sineCanvas");
+    
+    canvas.width = 1000;
+    canvas.height = 300;
+    
+    context = canvas.getContext("2d");
+    context.font = '18px sans-serif';
+    context.strokeStyle = '#000';
+    context.lineJoin = 'round';
+    
+    height = canvas.height;
+    width = canvas.width;
+    
+    xAxis = Math.floor(height/2);
+    yAxis = Math.floor(0);
+    
+    context.save();
+    draw();
+}
+
+/**
+ * Draw animation function.
+ * 
+ * This function draws one frame of the animation, waits 20ms, and then calls
+ * itself again.
+ */
+draw = function () {
+    
+    // Clear the canvas
+    context.clearRect(0, 0, width, height);
+
+    // Draw the axes in their own path
+    context.beginPath();
+    drawAxes();
+    context.stroke();
+    
+    // Set styles for animated graphics
+    context.save();
+    context.strokeStyle = '#000';
+    context.fillStyle = '#fff';
+    context.lineWidth = 2;
+
+    // Draw the sine curve at time draw.t, as well as the circle.
+    context.beginPath();
+    drawSine(draw.t);
+    
+    // Draw the arrow at time t in its own path.
+    // drawArrow(draw.t);
+    
+    // Restore original styles
+    context.restore();
+    
+    // Draw the xAxis PI tick and the time
+
+    // Update the time and draw again
+    draw.seconds = draw.seconds - .01;
+    draw.t = draw.seconds*Math.PI;
+    setTimeout(draw, 35);
+};
+draw.seconds = 0;
+
+/**
+ * Function to draw axes
+ */
+function drawAxes() {
+    
+    // Draw X and Y axes
+    context.moveTo(0, xAxis);
+    context.lineTo(width, xAxis);
+    context.moveTo(yAxis, 0);
+    context.lineTo(yAxis, height);
+    
+}
+
+/**
+ * Function to draw sine
+ * 
+ * The sine curve is drawn in 10px segments starting at the origin. 
+ */
+function drawSine(t) {
+
+    // Set the initial x and y, starting at 0,0 and translating to the origin on
+    // the canvas.
+
+    var x = t;
+    var y = Math.sin(x);
+    context.moveTo(yAxis, unit*y+xAxis);
+    
+    // Loop to draw segments
+    var last = 0;
+    for (i = yAxis; i <= width; i += 1) {
+        x = t+(-yAxis+i)/unit;
+
+        var sum = 0;
+        var cap = Math.floor(Math.exp((i-yAxis)/(1.5*314.159)));
+        for (n = 1; n <= Math.pow(2, cap-1); n+= 1) {
+          sum += Math.sin(2*Math.PI*(2*n-1)*x/Math.PI)/(2*n-1);
+        }
+
+        y = 4*sum/Math.PI;
+        context.lineTo(i, unit*y+xAxis);
+
+        if (cap > last && cap >= 1) {
+          last = cap
+          context.stroke()
+          context.beginPath();
+          context.strokeStyle = '#ddd';
+          drawCircle(i, xAxis, unit*4/(Math.PI*(2*cap-1)));
+          context.stroke()
+          context.moveTo(i, unit*y+xAxis);
+          
+          context.beginPath();
+          context.strokeStyle = '#000';
+        } 
+    }
+    context.stroke();
+
+    context.beginPath();
+    context.strokeStyle = '#ddd';
+    context.setLineDash([3,5])
+
+    var last = 0
+    for (i = yAxis; i <= width; i += 1) {
+    	var bar = Math.floor(Math.exp((i-yAxis)/(1.5*314.159)));
+    	if (bar > last && bar > 1) {
+    		last = bar
+    		context.moveTo(i, 0);
+            context.lineTo(i, 300);
+    	}
+    }
+    context.stroke();
+}
+
+/*
+ * Function to draw circle
+ */
+function drawCircle(x, y, r) {
+    context.moveTo(x+r, y);
+    // context.arc(x, y, r, 0, 2*Math.PI, false);
+}
+
+/**
+ * Function to draw arrow
+ */
+function drawArrow(t) {
+    
+    // Cache position of arrow on the circle
+    var x = yAxis+unit*Math.cos(t);
+    var y = xAxis+unit*Math.sin(t);
+    
+    // Draw the arrow line
+    context.beginPath();
+    context.moveTo(yAxis, xAxis);
+    context.lineTo(x, y);
+    context.stroke();
+    
+    // Draw the arrow bead
+    context.beginPath();
+    context.arc(x, y, 5, 0, 2*Math.PI, false);
+    context.fill();
+    context.stroke();
+    
+    // Draw dashed line to yAxis
+    context.beginPath();
+    var direction = (Math.cos(t) < 0) ? 1 : -1;
+    var start = (direction==-1) ? -5 : 0;
+    for (var i = x;  direction*i < direction*yAxis-5; i = i+direction*10) {
+        context.moveTo(i+direction*5, y);
+        context.lineTo(i+direction*10, y);
+    }
+    context.stroke();
+    
+    // Draw yAxis bead
+    context.beginPath();
+    context.arc(yAxis, y, 5, 0, 2*Math.PI, false);
+    context.fill();
+    context.stroke();
+}
+
+    Humble.Trig.init()
+    
+})();
+
 </script>
 
-<p>Where the sums are over all (possibly disconnected) domain wall paths and <script type="math/tex">L(P)</script> is the length of the path. Equating the sums term-by-term we find a mapping between high temperatures and low temperatures:</p>
+<p>Typically we are not interested in small lattice sizes and want to know what the behavior looks like in macroscopic systems. Defining an intrinsic quantity <script type="math/tex">\,f = \frac{1}{N\beta}\ln Z</script> called the <i>free energy per spin</i>, we can take a well-defined limit as the number of sites goes to infinity. For our 1D solution:</p>
 
-<script type="math/tex; mode=display">\tanh(\beta \hat{K}) \leftrightarrow e^{-2\beta K}</script>
+<script type="math/tex; mode=display">\lim_{N \rightarrow \infty}f = \ln2 + \ln \cosh K</script>
 
-<p>Under this mapping critical points must be mapped to critical points; so under the assumption that the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus:</p>
+<p>Which is completely smooth. No phase transition in 1D. It seems we’ll have to try something more complicated if we are to capture our elusive prey.</p>
 
-<script type="math/tex; mode=display">\sinh(2K_c) = 1</script>
+<p>(<a href="https://www.youtube.com/watch?v=AT4_S9vQJgc">Leonard Susskind give’s a very intuite explanation on why a phase transition cannot occur in 1D, making analogy with the game of telephone</a>)</p>
 
-<p>Manipulating the sinh term we get a polynomial in <script type="math/tex">\chi = e^{2K_c}</script>:</p>
+<h2 id="criticality-in-2d">Criticality in 2D</h2>
 
-<script type="math/tex; mode=display">2\chi - \chi^2 - 1 = 0</script>
+<p>The full solution in two dimensions is very complicated to derive (apparently it took Richard Feynman 14 pages to explain it in his lectures on statistical mechanics). I won’t endeavor to try your patience to such an extent, but fortunately we can find the critical temperature in a slightly less painful manner, using a result called <a href="http://en.wikipedia.org/wiki/Kramers%E2%80%93Wannier_duality"><i>Kramers-Wannier Duality</i></a>. Nevertheless, a certain amount of pain must be endured, so if you’re more algorithmically minded feel free to make a cowardly break for the next section.</p>
 
-<p>Finally we end up with a critical temperature at:</p>
+<p>To begin we rewrite the partition function as</p>
+
+<script type="math/tex; mode=display"> Z = \cosh(K)^N Z^\prime </script>
+
+<script type="math/tex; mode=display"> Z^\prime = \sum_{\{\sigma\}} \prod_{\langle i,j \rangle} [1 + \sigma_i \sigma_j \tanh(K)]</script>
+
+<p>using the fact that <script type="math/tex">e^{\pm x} = \cosh(x)[1 \pm \tanh(x)] </script>. We can keep track of the terms combinitorically by matching the <script type="math/tex">\sigma_i \sigma_j \tanh(K)</script> terms up to edges in a subgraph <script type="math/tex">P</script> of the lattice:</p>
+
+<script type="math/tex; mode=display"> Z^\prime = \sum_{\{P\}} \prod_{\langle i,j \rangle \in P} \sigma_i \sigma_j tanh(K)</script>
+
+<p>Consider a subgraph consisting of a single non-self-intersecting path and let <script type="math/tex">P(k)</script> denote the <script type="math/tex">k</script>th site along the path: </p>
+
+<center>
+	<img src="/images/kramers-wannier-duality-002.png" height="200" width="200" />
+</center>
+
+<script type="math/tex; mode=display"> \sum_{\{\sigma\}} \sigma_{i} \sigma_{P(1)}^2 \sigma_{P(2)}^2 \ldots \sigma_{P(L-1)}^2 \sigma_{f} = 0</script>
+
+<p><i>unless</i> <script type="math/tex">P(0) = P(L)</script>, i.e.: <script type="math/tex">P</script> is a closed path. More generally, we can use this same idea to prove that the only link configurations that contribute to the partition function are those that form <i>even subgraphs</i>. Using this fact we can further simplify <script type="math/tex">Z^\prime</script>:</p>
+
+<script type="math/tex; mode=display"> Z^\prime = \sum_{l=0}^{2S} c(l) \tanh(K)^l </script>
+
+<p>where <script type="math/tex">c(l)</script> counts the number of even subgraphs with length <script type="math/tex">l</script>. This is one half of the duality, usually referred to as the <i>high temperature expansion</i>.</p>
+
+<p>Now, consider the <i>dual</i> lattice whose sites sit in the squares of the original lattice and whose neighbors are those squares it shares an edge with. When we use periodic boundary conditions the lattice forms a torus, and in fact the dual lattice forms an identical torus!</p>
+
+<p>Given an even subgraph on the original lattice there exists a two-to-one correspondence with spin configurations on the dual lattice:</p>
+
+<center>
+	<img src="/images/kramers-wannier-duality-001.png" height="200" width="500" />
+</center>
+
+<p>At least, that is <i>almost</i> true. In fact the correspondence breaks down for certain subgraphs which wrap completely around the torus, but these terms contribute negligbly to the summation and will go to zero in the thermodynamic limit.</p>
+
+<p>At low energy all of the spins in the dual lattice will be lined up, so the ground state energy is <script type="math/tex">H_0 = -KN</script>. Thus, we can rewrite the original Hamiltonian as: </p>
+
+<script type="math/tex; mode=display">H = H_0 + \sum_{\sigma_i \neq \sigma_j \vert \langle i,j \rangle} 2K</script>
+
+<p>Here the summation is only over the links connecting sites of differing spin, which occur precisely across each of the edges present in the subgraphs of the high temperature expansion; each edge lifing the energy by <script type="math/tex">2K</script>. Note that the energy of a configuration again depends <i>only</i> on the number of edges in the subgraph. This allows us to write the partition function in a suggestively familiar form:</p>
+
+<script type="math/tex; mode=display"> \hat{Z} = 2e^{\hat{K}N}\sum_{l=0}^{2N} c(l)e^{-2\hat{K}l} </script>
+
+<p>where the factor of 2 out front comes from the two-to-one correspondence between the dual lattice and even subgraphs on the original lattice. Behold: the <i>low temperature expansion</i>! </p>
+
+<p>As we take <script type="math/tex">N \rightarrow \infty</script> both expansions must be identical under the identification <script type="math/tex">\tanh(K) \leftrightarrow e^{-2\hat{K}}</script>:</p>
+
+<script type="math/tex; mode=display"> \frac{\hat{Z}}{2e^{\hat{K}N}} = \frac{Z}{\cosh(K)^N} = \sum_{l} c(l)e^{-2\hat{K}l} = \sum_{l} c(l) \tanh(K)^l</script>
+
+<p>This identification defines a mapping between high temperature and low temperature which preserves analytic behavior. Since critical points are <i>defined</i> by nonanalyticity, critical points must be mapped to critical points. </p>
+
+<p>If we assume the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus <script type="math/tex">K_c</script> occurs when <script type="math/tex">K=\hat{K}</script>, and manipulating the tanh term we get a polynomial in <script type="math/tex">\chi = e^{2K_c}</script>:</p>
+
+<script type="math/tex; mode=display">\chi^2 - 2\chi - 1 = 0</script>
+
+<p>Solving this we find the critical temperature</p>
 
 <script type="math/tex; mode=display"> T_c = \frac{2J}{k \ln(1+\sqrt2)} </script>
+
+<p>and can now go to sleep. . .But ho! I am not through with you yet:</p>
 
 <h2 id="the-metropolis-algorithm">The Metropolis Algorithm</h2>
 
 <p>Every physics treatment of this algorithm that I’ve read feels as if it’s described backwards, so I’m going to try doing things a bit differently.</p>
 
-<p>The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let <script type="math/tex">P</script> denote the <script type="math/tex">2^Sx2^S</script> transition matrix where <script type="math/tex">S</script> is the number of lattice sites and whose entries <script type="math/tex">P_{AB}</script> represent the probability of transitioning from state <script type="math/tex">A</script> to state <script type="math/tex">B</script>.</p>
+<p>The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let <script type="math/tex">P</script> denote the <script type="math/tex">2^Nx2^N</script> transition matrix whose entries <script type="math/tex">P_{AB}</script> represent the probability of transitioning from state <script type="math/tex">A</script> to state <script type="math/tex">B</script>.</p>
 
 <p>A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the <a href="http://en.wikipedia.org/wiki/Detailed_balance"><i>detailed balance</i></a> condition: </p>
 
@@ -187,7 +456,7 @@
 
 <p>We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let’s define:</p>
 
-<script type="math/tex; mode=display">P_{AB} = \frac{1}{S} \mathcal{A}_{AB}</script>
+<script type="math/tex; mode=display">P_{AB} = \frac{1}{N} \mathcal{A}_{AB}</script>
 
 <script type="math/tex; mode=display">% <![CDATA[
 
@@ -205,7 +474,7 @@
 
 <ol>
   <li>initialize lattice with some spin configuration <script type="math/tex">\{\sigma\}</script></li>
-  <li>choose <script type="math/tex">\sigma_i</script> uniformly at random (drawing from <script type="math/tex">p(\sigma_i) = \frac{1}{S}</script>)</li>
+  <li>choose <script type="math/tex">\sigma_i</script> uniformly at random (drawing from <script type="math/tex">p(\sigma_i) = \frac{1}{N}</script>)</li>
   <li>set <script type="math/tex">\sigma_i := - \sigma_i</script> defining the transition <script type="math/tex">A \rightarrow B</script></li>
   <li>accept new state with probability <script type="math/tex">\mathcal{A}_{AB}</script></li>
   <li>if new state is rejected reset <script type="math/tex">\sigma_i</script> to its previous state</li>
@@ -241,7 +510,9 @@
 
 <p><a href="http://math.arizona.edu/~tgk/541/chap3.pdf">[3] The Renormalization Group for Ising Spins</a></p>
 
-<p><a href="http://arxiv.org/pdf/hep-lat/0506036v1.pdf">[4] Lattice QCD for Novices</a></p>
+<p><a href="http://www.peliti.org/Notes/ising2/vdov.html">[4] Exact Solution of the 2D Ising Model</a></p>
+
+<p><a href="http://arxiv.org/pdf/hep-lat/0506036v1.pdf">[5] Lattice QCD for Novices</a></p>
 
 </article>
 
