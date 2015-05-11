@@ -121,6 +121,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 &lt;p&gt;This approximation will always underestimate the true hitting time, as all the unused probabily mass after &lt;script type=&quot;math/tex&quot;&gt;T-1&lt;/script&gt; gets lumped into the &lt;script type=&quot;math/tex&quot;&gt;T&lt;/script&gt; term. Thus we’ll have to play with cutoff to make sure the range &lt;script type=&quot;math/tex&quot;&gt;[0, T]&lt;/script&gt; has sufficient resolution to capture most of the interesting behavior.&lt;/p&gt;
 
+&lt;!-- 
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;scipy&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sparse&lt;/span&gt;
 
 
@@ -153,6 +154,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	&lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;T_matrix&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rho_n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
 	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;E_n&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+ --&gt;
 
 &lt;p&gt;That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!&lt;/p&gt;
 

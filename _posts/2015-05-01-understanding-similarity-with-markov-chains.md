@@ -122,7 +122,7 @@ $$ h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T
 This approximation will always underestimate the true hitting time, as all the unused probabily mass after $$T-1$$ gets lumped into the $$T$$ term. Thus we'll have to play with cutoff to make sure the range $$[0, T]$$ has sufficient resolution to capture most of the interesting behavior.
 
 
-{% highlight python %}
+<!-- {% highlight python %}
 from scipy import sparse
 
 
@@ -155,7 +155,7 @@ def truncatedHittingTimes(W, epsilon=.01, T=30):
 	E_n = E_n + T_matrix - T_matrix.multiply(rho_n)
 
 	return E_n
-{% endhighlight %}
+{% endhighlight %} -->
 
 That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
 
