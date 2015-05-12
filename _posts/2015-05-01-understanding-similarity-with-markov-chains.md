@@ -78,7 +78,7 @@ from scipy import sparse
 def personalizedPageRank(W, pi0, beta=.1, n=30):
 	D_inv = sparse.dia_matrix(W.shape)
 	D_inv.setdiag([(not num or num**-1+1)-1 for num in W.sum(axis=0).tolist()[0]])
-	P = D_inv * W
+	P = D_inv*W
 
 	pi_n = pi0.copy()
 	for i in range(n):
@@ -97,7 +97,7 @@ Alternatively, given any <i>two</i> vertices, we compute their PageRank's separa
 
 Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?
 
-$$ h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{pi_i \pi_j}} $$
+$$ h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} $$
 
 where $$ L^\dagger = (L^T L)^{-1}L^T $$ is the [<i>Moore-Penrose pseudoinverse</i>](http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse), $$L = I - D^{-1/2} W D^{-1/2}$$ is the [<i>normalized graph Laplacian</i>](http://en.wikipedia.org/wiki/Laplacian_matrix), and $$\pi$$ is the stationary distribution of $$P$$. Now personally, I think this is a very cool formula. The only problem is that it's totally useless for most practical calculations. Assuming the graph we're dealing with is large enough to require exploiting its sparsity we're out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.
 
@@ -122,40 +122,31 @@ $$ h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T
 This approximation will always underestimate the true hitting time, as all the unused probabily mass after $$T-1$$ gets lumped into the $$T$$ term. Thus we'll have to play with cutoff to make sure the range $$[0, T]$$ has sufficient resolution to capture most of the interesting behavior.
 
 
-<!-- {% highlight python %}
+{% highlight python %}
 from scipy import sparse
 
 
-def truncatedCommuteTimes(W, epsilon=.01, T=30):
-	E_n = truncatedHittingTimes(W, epsilon, T)
-	return E_n + E_n.T
-
-
-def truncatedHittingTimes(W, epsilon=.01, T=30):
+def truncatedHittingTimes(W, i, T=100):
 	D_inv = sparse.dia_matrix(W.shape)
 	D_inv.setdiag([(not num or num**-1+1)-1 for num in W.sum(axis=0).tolist()[0]])
-	P = D_inv * W
-	I = sparse.identity(P.shape[0])
+	P = D_inv*W
 
-	P_n = I
-	rho_n = sparse.csr_matrix(P.shape)
-	E_n = sparse.csr_matrix(P.shape)
+	one_vector = np.ones(P.shape[0])
+	h = np.zeros(P.shape[0])
+	rho_t = np.zeros(P.shape[0])
+	used_probability = np.zeros(P.shape[0])
 
-	n = 1
-	while n < T:
-		print n, len(P_n.data), len(rho_n.data), len(E_n.data)
-		rho_n = rho_n + P_n - P_n.multiply(rho_n)
-		P_n = P_n*P
-		E_n = E_n + n*(P_n - P_n.multiply(rho_n))
-		n += 1
+	rho_t[i] = 1
+	used_probability[i] = 1
 
-	#Calculate remainder
-	rho_n = rho_n + P_n - P_n.multiply(rho_n)
-	T_matrix = (E_n / E_n.max()).ceil()*T
-	E_n = E_n + T_matrix - T_matrix.multiply(rho_n)
+	for t in range(1, T):
+		rho_t = rho_t*P
+		currentProbability = rho_t*(one_vector-used_probability)
+		used_probability += currentProbability
+		h += t*currentProbability
 
-	return E_n
-{% endhighlight %} -->
+	return h + T*(one_vector-used_probability)
+{% endhighlight %}
 
 That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
 

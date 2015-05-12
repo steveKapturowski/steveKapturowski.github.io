@@ -99,7 +99,7 @@
   <h1>Understanding Similarity With Markov Chains</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">10 minute read</span>
+  <span class="post-meta small">9 minute read</span>
 </div>
 
 <article class="post-content">
@@ -174,7 +174,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 <span class="k">def</span> <span class="nf">personalizedPageRank</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">pi0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
 	<span class="n">D_inv</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 	<span class="n">D_inv</span><span class="o">.</span><span class="n">setdiag</span><span class="p">([(</span><span class="ow">not</span> <span class="n">num</span> <span class="ow">or</span> <span class="n">num</span><span class="o">**-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
-	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span> <span class="o">*</span> <span class="n">W</span>
+	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span><span class="o">*</span><span class="n">W</span>
 
 	<span class="n">pi_n</span> <span class="o">=</span> <span class="n">pi0</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
@@ -192,7 +192,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?</p>
 
-<script type="math/tex; mode=display"> h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{pi_i \pi_j}} </script>
+<script type="math/tex; mode=display"> h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} </script>
 
 <p>where <script type="math/tex"> L^\dagger = (L^T L)^{-1}L^T </script> is the <a href="http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse"><i>Moore-Penrose pseudoinverse</i></a>, <script type="math/tex">L = I - D^{-1/2} W D^{-1/2}</script> is the <a href="http://en.wikipedia.org/wiki/Laplacian_matrix"><i>normalized graph Laplacian</i></a>, and <script type="math/tex">\pi</script> is the stationary distribution of <script type="math/tex">P</script>. Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.</p>
 
@@ -216,40 +216,29 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>This approximation will always underestimate the true hitting time, as all the unused probabily mass after <script type="math/tex">T-1</script> gets lumped into the <script type="math/tex">T</script> term. Thus we’ll have to play with cutoff to make sure the range <script type="math/tex">[0, T]</script> has sufficient resolution to capture most of the interesting behavior.</p>
 
-<!-- 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 
 
-<span class="k">def</span> <span class="nf">truncatedCommuteTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=.</span><span class="mo">01</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
-	<span class="n">E_n</span> <span class="o">=</span> <span class="n">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">,</span> <span class="n">T</span><span class="p">)</span>
-	<span class="k">return</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">E_n</span><span class="o">.</span><span class="n">T</span>
-
-
-<span class="k">def</span> <span class="nf">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=.</span><span class="mo">01</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
 	<span class="n">D_inv</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 	<span class="n">D_inv</span><span class="o">.</span><span class="n">setdiag</span><span class="p">([(</span><span class="ow">not</span> <span class="n">num</span> <span class="ow">or</span> <span class="n">num</span><span class="o">**-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
-	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span> <span class="o">*</span> <span class="n">W</span>
-	<span class="n">I</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span><span class="o">*</span><span class="n">W</span>
 
-	<span class="n">P_n</span> <span class="o">=</span> <span class="n">I</span>
-	<span class="n">rho_n</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-	<span class="n">E_n</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">csr_matrix</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+	<span class="n">one_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="n">rho_t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="n">used_probability</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">P</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-	<span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
-	<span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">T</span><span class="p">:</span>
-		<span class="k">print</span> <span class="n">n</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">P_n</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">rho_n</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">E_n</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-		<span class="n">rho_n</span> <span class="o">=</span> <span class="n">rho_n</span> <span class="o">+</span> <span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
-		<span class="n">P_n</span> <span class="o">=</span> <span class="n">P_n</span><span class="o">*</span><span class="n">P</span>
-		<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">n</span><span class="o">*</span><span class="p">(</span><span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">))</span>
-		<span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+	<span class="n">rho_t</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+	<span class="n">used_probability</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-	<span class="c">#Calculate remainder</span>
-	<span class="n">rho_n</span> <span class="o">=</span> <span class="n">rho_n</span> <span class="o">+</span> <span class="n">P_n</span> <span class="o">-</span> <span class="n">P_n</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
-	<span class="n">T_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">E_n</span> <span class="o">/</span> <span class="n">E_n</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">.</span><span class="n">ceil</span><span class="p">()</span><span class="o">*</span><span class="n">T</span>
-	<span class="n">E_n</span> <span class="o">=</span> <span class="n">E_n</span> <span class="o">+</span> <span class="n">T_matrix</span> <span class="o">-</span> <span class="n">T_matrix</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">rho_n</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T</span><span class="p">):</span>
+		<span class="n">rho_t</span> <span class="o">=</span> <span class="n">rho_t</span><span class="o">*</span><span class="n">P</span>
+		<span class="n">currentProbability</span> <span class="o">=</span> <span class="n">rho_t</span><span class="o">*</span><span class="p">(</span><span class="n">one_vector</span><span class="o">-</span><span class="n">used_probability</span><span class="p">)</span>
+		<span class="n">used_probability</span> <span class="o">+=</span> <span class="n">currentProbability</span>
+		<span class="n">h</span> <span class="o">+=</span> <span class="n">t</span><span class="o">*</span><span class="n">currentProbability</span>
 
-	<span class="k">return</span> <span class="n">E_n</span></code></pre></div>
- -->
+	<span class="k">return</span> <span class="n">h</span> <span class="o">+</span> <span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="n">one_vector</span><span class="o">-</span><span class="n">used_probability</span><span class="p">)</span></code></pre></div>
 
 <p>That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!</p>
 
