@@ -6,12 +6,7 @@ summary:   The Ising model is a simplified description of ferromagnetism where s
 permalink: ising-model
 ---
 
-<center>
-<video width="300" height="240" controls>
-	<source src="/videos/ising.m4v" type="video/mp4">
-	Your browser does not support the video tag.
-</video>
-</center>
+{% include ising.html %}
 
 The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.
 

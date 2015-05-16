@@ -211,12 +211,237 @@ We can compute the singular value decomposition on large matrices via the Lanczo
     
       <item>
         <title>MCMC, Renormalization, and the Ising Model</title>
-        <description>&lt;center&gt;
-&lt;video width=&quot;300&quot; height=&quot;240&quot; controls=&quot;&quot;&gt;
-	&lt;source src=&quot;/videos/ising.m4v&quot; type=&quot;video/mp4&quot; /&gt;
-	Your browser does not support the video tag.
-&lt;/video&gt;
+        <description>&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;style&gt;
+.hide {
+  display: none;
+}
+.rect {
+  fill: none;
+  stroke: hsl(0, 0%, 70%);
+}
+.vrange {
+  margin-top: 0px;
+  transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;center&gt;
+  &lt;p&gt;
+    &lt;input id=&quot;temperature&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot; /&gt;&lt;label&gt; Temperature [kT/J]&lt;/label&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+    &lt;foo&gt;&lt;/foo&gt;
+    &lt;!-- &lt;input id=&quot;speed&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot;&gt;&lt;label&gt;Speed&lt;/label&gt; --&gt;
+  &lt;/p&gt;
+  &lt;p&gt;
+&lt;!--     &lt;select id=&quot;model&quot;&gt;
+      &lt;option value=&quot;ising&quot;&gt;Ising&lt;/option&gt;
+      &lt;option value=&quot;xy&quot;&gt;XY&lt;/option&gt;
+    &lt;/select&gt; --&gt;
+    &lt;select id=&quot;algorithm&quot;&gt;
+      &lt;option value=&quot;wolff&quot;&gt;Wolff&lt;/option&gt;
+      &lt;option value=&quot;metropolis&quot;&gt;Metropolis&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/p&gt;
 &lt;/center&gt;
+
+&lt;script src=&quot;http://d3js.org/d3.v3.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+(function() {
+  &quot;use strict&quot;;
+
+  var
+    margin = {top: 40, right: 100, bottom: 40, left: 150},
+    W = 300,
+    H = 300,
+    w = W - margin.left - margin.right,
+    h = H - margin.top - margin.bottom,
+
+    xmax   = 1.5,
+    rate   = 1 / 10000,
+    T = 2.5,
+
+    timer;
+
+
+  var svg = d3.select(&quot;foo&quot;)
+    .append(&quot;svg&quot;)
+      .attr(&quot;width&quot;, W)
+      .attr(&quot;height&quot;, H)
+
+  var N = 40;
+  var dim = W/N;
+  var lattice = new Array(Math.pow(N, 2));
+
+  for (var i=0; i &lt; Math.pow(N, 2); i++) {
+    var x = i % N;
+    var y = Math.floor(i / N);
+
+    lattice[i] = {
+      &quot;x&quot;: x*dim,
+      &quot;y&quot;: y*dim,
+      &quot;height&quot;: dim,
+      &quot;width&quot;: dim,
+      &quot;spin&quot;: (Math.random() &lt; .9) ? 1 : -1
+    };
+  }
+
+  var rectangles = svg.selectAll(&quot;rect&quot;)
+    .data(lattice)
+    .enter()
+    .append(&quot;rect&quot;);
+
+  var rectangleAttributes = rectangles
+    .attr(&quot;x&quot;, function (d) { return d.x; })
+    .attr(&quot;y&quot;, function (d) { return d.y; })
+    .attr(&quot;height&quot;, function (d) { return d.height; })
+    .attr(&quot;width&quot;, function (d) { return d.width; })
+    .style(&quot;fill&quot;, function(d) { return (d.spin == 1) ? &quot;black&quot; : &quot;white&quot;; });
+
+
+  var models = {
+    ising: function(lattice) {
+      
+    },
+    xy: function(lattice) {
+      
+    },
+  };
+
+  function getNeighbors(index) {
+    var 
+      numSites = Math.pow(N, 2),
+      left = index - 1,
+      right = left + 2;
+
+    if (index % N == 0) {
+      left += N;
+    } else if (right % N == 0) {
+      right -= N;
+    }
+
+    return [
+      (index + N + numSites) % numSites, //javascript&#39;s mod operation makes mathematicians cry
+      (index - N + numSites) % numSites,
+      left,
+      right,
+    ]
+  }
+
+  function growChain() {
+    var
+      chain = {},
+      newSites = {},
+      addedSites = {},
+      index = Math.floor(Math.random()*Math.pow(N, 2));
+
+    chain[index] = true;
+    addedSites[index] = true;
+
+    while ( Object.keys(addedSites).length &gt; 0 ) {
+      newSites = {};
+
+      Object.keys(addedSites).forEach(function (key) { 
+        index = parseInt(key);
+        // document.write(index, &quot; : &quot;);
+
+        getNeighbors(index).forEach(function (neighbor) { 
+          if ( 
+            !(neighbor in chain) 
+            &amp;&amp; ( Math.random() &lt; (1 - Math.exp(-2*lattice[index][&quot;spin&quot;]*lattice[neighbor][&quot;spin&quot;]/T)) )
+          ) { 
+            // document.write(&quot;fuck&quot;);
+            chain[neighbor] = true;
+            newSites[neighbor] = true;
+          }
+        });
+      });
+      addedSites = newSites;
+    }
+    return chain;
+  }
+
+  function flipChain(indices) {
+    // document.write(Object.keys(indices).length, &quot; : &quot;);
+    Object.keys(indices).forEach(function (key) { 
+      lattice[key][&quot;spin&quot;] *= -1;
+    });
+  }
+
+  var algorithms = {
+    metropolis: function() {
+      var 
+        index = Math.floor(Math.random()*Math.pow(N, 2)),
+        Edelta = 0;
+
+      getNeighbors(index).forEach(function (neighbor) { 
+        Edelta -= 2 * lattice[index][&quot;spin&quot;] * lattice[neighbor][&quot;spin&quot;];
+      });
+      if (Math.random() &lt; Math.exp(Edelta/T)) {
+        lattice[index][&quot;spin&quot;] *= -1;
+      }
+    },
+    wolff: function() {
+      flipChain(growChain());
+    },
+  };
+
+  var 
+    algorithm = algorithms.wolff,
+    model = models.ising;
+
+  function drawGraph() {
+    algorithm();
+
+    // rectangles = svg.selectAll(&quot;rect&quot;)
+    // .data(lattice)
+    // .enter()
+    // .append(&quot;rect&quot;);
+    
+    rectangleAttributes = rectangles
+      .attr(&quot;x&quot;, function (d) { return d.x; })
+      .attr(&quot;y&quot;, function (d) { return d.y; })
+      .attr(&quot;height&quot;, function (d) { return d.height; })
+      .attr(&quot;width&quot;, function (d) { return d.width; })
+      .style(&quot;fill&quot;, function(d) { return (d.spin == -1) ? &quot;black&quot; : &quot;white&quot;; });
+
+  }
+
+  function play() {
+    if (timer) return;
+    (function loop() {
+      drawGraph();
+      timer = setTimeout(loop, rate * 1000);
+    })();
+  }
+
+  function togglePause() {
+    if (!timer) {
+
+    } else {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+
+  function redraw() {
+    
+  }
+
+  d3.slider;
+  d3.select(&quot;#temperature&quot;).on(&quot;change&quot;, function() { T = this.value; });
+  // d3.select(&quot;#size&quot;).on(&quot;change&quot;, function() { L = +this.value; redraw(); });
+  d3.select(&quot;#model&quot;).on(&quot;change&quot;, function() { model = models[this.value]; redraw(); });
+  d3.select(&quot;#algorithm&quot;).on(&quot;change&quot;, function() { algorithm = algorithms[this.value]; });
+
+  play();
+
+})();
+&lt;/script&gt;
 
 &lt;p&gt;The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.&lt;/p&gt;
 

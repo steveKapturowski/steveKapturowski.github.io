@@ -99,16 +99,241 @@
   <h1>MCMC, Renormalization, and the Ising Model</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">14 minute read</span>
+  <span class="post-meta small">17 minute read</span>
 </div>
 
 <article class="post-content">
-  <center>
-<video width="300" height="240" controls="">
-	<source src="/videos/ising.m4v" type="video/mp4" />
-	Your browser does not support the video tag.
-</video>
+  <head>
+<meta charset="utf-8" />
+<style>
+.hide {
+  display: none;
+}
+.rect {
+  fill: none;
+  stroke: hsl(0, 0%, 70%);
+}
+.vrange {
+  margin-top: 0px;
+  transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+}
+</style>
+</head>
+<center>
+  <p>
+    <input id="temperature" type="range" value="2.5" min="0.0" max="5.0" step="0.01" /><label> Temperature [kT/J]</label>
+  </p>
+  <p>
+    <foo></foo>
+    <!-- <input id="speed" type="range" value="2.5" min="0.0" max="5.0" step="0.01"><label>Speed</label> -->
+  </p>
+  <p>
+<!--     <select id="model">
+      <option value="ising">Ising</option>
+      <option value="xy">XY</option>
+    </select> -->
+    <select id="algorithm">
+      <option value="wolff">Wolff</option>
+      <option value="metropolis">Metropolis</option>
+    </select>
+  </p>
 </center>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+(function() {
+  "use strict";
+
+  var
+    margin = {top: 40, right: 100, bottom: 40, left: 150},
+    W = 300,
+    H = 300,
+    w = W - margin.left - margin.right,
+    h = H - margin.top - margin.bottom,
+
+    xmax   = 1.5,
+    rate   = 1 / 10000,
+    T = 2.5,
+
+    timer;
+
+
+  var svg = d3.select("foo")
+    .append("svg")
+      .attr("width", W)
+      .attr("height", H)
+
+  var N = 40;
+  var dim = W/N;
+  var lattice = new Array(Math.pow(N, 2));
+
+  for (var i=0; i < Math.pow(N, 2); i++) {
+    var x = i % N;
+    var y = Math.floor(i / N);
+
+    lattice[i] = {
+      "x": x*dim,
+      "y": y*dim,
+      "height": dim,
+      "width": dim,
+      "spin": (Math.random() < .9) ? 1 : -1
+    };
+  }
+
+  var rectangles = svg.selectAll("rect")
+    .data(lattice)
+    .enter()
+    .append("rect");
+
+  var rectangleAttributes = rectangles
+    .attr("x", function (d) { return d.x; })
+    .attr("y", function (d) { return d.y; })
+    .attr("height", function (d) { return d.height; })
+    .attr("width", function (d) { return d.width; })
+    .style("fill", function(d) { return (d.spin == 1) ? "black" : "white"; });
+
+
+  var models = {
+    ising: function(lattice) {
+      
+    },
+    xy: function(lattice) {
+      
+    },
+  };
+
+  function getNeighbors(index) {
+    var 
+      numSites = Math.pow(N, 2),
+      left = index - 1,
+      right = left + 2;
+
+    if (index % N == 0) {
+      left += N;
+    } else if (right % N == 0) {
+      right -= N;
+    }
+
+    return [
+      (index + N + numSites) % numSites, //javascript's mod operation makes mathematicians cry
+      (index - N + numSites) % numSites,
+      left,
+      right,
+    ]
+  }
+
+  function growChain() {
+    var
+      chain = {},
+      newSites = {},
+      addedSites = {},
+      index = Math.floor(Math.random()*Math.pow(N, 2));
+
+    chain[index] = true;
+    addedSites[index] = true;
+
+    while ( Object.keys(addedSites).length > 0 ) {
+      newSites = {};
+
+      Object.keys(addedSites).forEach(function (key) { 
+        index = parseInt(key);
+        // document.write(index, " : ");
+
+        getNeighbors(index).forEach(function (neighbor) { 
+          if ( 
+            !(neighbor in chain) 
+            && ( Math.random() < (1 - Math.exp(-2*lattice[index]["spin"]*lattice[neighbor]["spin"]/T)) )
+          ) { 
+            // document.write("fuck");
+            chain[neighbor] = true;
+            newSites[neighbor] = true;
+          }
+        });
+      });
+      addedSites = newSites;
+    }
+    return chain;
+  }
+
+  function flipChain(indices) {
+    // document.write(Object.keys(indices).length, " : ");
+    Object.keys(indices).forEach(function (key) { 
+      lattice[key]["spin"] *= -1;
+    });
+  }
+
+  var algorithms = {
+    metropolis: function() {
+      var 
+        index = Math.floor(Math.random()*Math.pow(N, 2)),
+        Edelta = 0;
+
+      getNeighbors(index).forEach(function (neighbor) { 
+        Edelta -= 2 * lattice[index]["spin"] * lattice[neighbor]["spin"];
+      });
+      if (Math.random() < Math.exp(Edelta/T)) {
+        lattice[index]["spin"] *= -1;
+      }
+    },
+    wolff: function() {
+      flipChain(growChain());
+    },
+  };
+
+  var 
+    algorithm = algorithms.wolff,
+    model = models.ising;
+
+  function drawGraph() {
+    algorithm();
+
+    // rectangles = svg.selectAll("rect")
+    // .data(lattice)
+    // .enter()
+    // .append("rect");
+    
+    rectangleAttributes = rectangles
+      .attr("x", function (d) { return d.x; })
+      .attr("y", function (d) { return d.y; })
+      .attr("height", function (d) { return d.height; })
+      .attr("width", function (d) { return d.width; })
+      .style("fill", function(d) { return (d.spin == -1) ? "black" : "white"; });
+
+  }
+
+  function play() {
+    if (timer) return;
+    (function loop() {
+      drawGraph();
+      timer = setTimeout(loop, rate * 1000);
+    })();
+  }
+
+  function togglePause() {
+    if (!timer) {
+
+    } else {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+
+  function redraw() {
+    
+  }
+
+  d3.slider;
+  d3.select("#temperature").on("change", function() { T = this.value; });
+  // d3.select("#size").on("change", function() { L = +this.value; redraw(); });
+  d3.select("#model").on("change", function() { model = models[this.value]; redraw(); });
+  d3.select("#algorithm").on("change", function() { algorithm = algorithms[this.value]; });
+
+  play();
+
+})();
+</script>
 
 <p>The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.</p>
 
