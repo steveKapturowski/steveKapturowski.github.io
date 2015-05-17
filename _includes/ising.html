@@ -13,30 +13,52 @@
   transform: rotate(90deg);
   -moz-transform: rotate(90deg);
 }
+input[type=range] {
+  -webkit-appearance: none;
+  margin: 14px 0;
+  width: 20%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 20%;
+  height: 7.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+  margin-top: -12px;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 14px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -3px;
+}
+
 </style>
 </head>
 <center>
   <p>
-    <input id="temperature" type="range" value="2.5" min="0.0" max="5.0" step="0.01" list="tickmarks">
-<!--     <datalist id="tickmarks">
-      <option>0</option>
-      <option>1</option>
-      <option>2</option>
-      <option>3</option>
-      <option>4</option>
-      <option>5</option>
-    </datalist> -->
-    <label> Temperature [kT/J]</label>
+    <input id="temperature" type="range" value="2.5" min="0.0" max="5.0" step="0.01" ticks="true">
+    <label style="font-size:17px">Temperature [kT/J]</label>
   </p>
   <p>
     <foo></foo>
-    <!-- <input id="speed" type="range" value="2.5" min="0.0" max="5.0" step="0.01"><label>Speed</label> -->
   </p>
   <p>
-<!--     <select id="model">
+    <select id="model">
       <option value="ising">Ising</option>
       <option value="xy">XY</option>
-    </select> -->
+    </select>
     <select id="algorithm">
       <option value="wolff">Wolff</option>
       <option value="metropolis">Metropolis</option>
@@ -46,7 +68,7 @@
 
 
 <script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
+<script type="text/javascript">
 (function() {
   "use strict";
 
@@ -63,6 +85,8 @@
     N = 48,
     dim = W/N,
 
+    model,
+    algorithm,
     rectangles,
     lattice,
     timer;
@@ -85,7 +109,7 @@
       var spin;
 
       if ( lattice == null ) {
-        spin = (Math.random() < .5) ? 1 : -1;
+        spin = model.randomSpin();
       } else {
         var oldX = Math.floor((x + .5) * N/newN);
         var oldY = Math.floor((y + .5) * N/newN);
@@ -93,14 +117,7 @@
 
         var sites = getNeighbors(index);
         sites.push(index);
-
-        var sum = sites.map(function(j) {
-          return lattice[j]["spin"];
-        }).reduce(function(a, b) {
-          return a + b;
-        }, 0);
-
-        spin = (Math.random() > (sum+5)/10) ? -1 : 1;
+        spin = model.averageSites(sites);
       }
         
       newLattice[i] = {
@@ -117,33 +134,86 @@
       .data(newLattice)
       .enter()
       .append("rect");
+    model.render();
 
-    rectangles
-      .attr("x", function (e) { return e.x; })
-      .attr("y", function (e) { return e.y; })
-      .attr("height", function (e) { return e.height; })
-      .attr("width", function (e) { return e.width; })
-      .style("fill", function(e) { return (e.spin == 1) ? "black" : "white"; });
-    
     N = newN;
     dim = newDim;
     lattice = newLattice;
   }
-  initLattice(N);
-
 
   function Ising () {}
-  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {};
-  Ising.prototype.flipSpin = function() {};
-  Ising.prototype.render = function() {};
+  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {
+    return s1 * s2
+  };
+  Ising.prototype.flipChain = function(indices) {
+    indices.forEach(function (index) { 
+      lattice[index]["spin"] *= -1;
+    });
+    return indices
+  };
+  Ising.prototype.averageSites = function(sites) {
+    var sum = sites.map(function(j) {
+      return lattice[j]["spin"];
+    }).reduce(function(a, b) {
+      return a + b;
+    }, 0);
+    return (Math.random() > (sum+5)/10) ? -1 : 1;
+  };
+  Ising.prototype.randomSpin = function() {
+    return (Math.random() > .5) ? 1 : -1;
+  };
+  Ising.prototype.render = function(value) {
+    // rectangles = svg.selectAll("rect")
+    //   .data(indices.map(function(index) {
+    //     return lattice[index];
+    //   })); // get rectangles whose spins have been modified
+    rectangles
+      .attr("x", function (d) { return d.x; })
+      .attr("y", function (d) { return d.y; })
+      .attr("height", function (d) { return d.height; })
+      .attr("width", function (d) { return d.width; })
+      .style("fill", function(d) { return (d.spin == -1) ? "black" : "white"; });
+  };
+
+  function XY () {}
+  XY.prototype.nearestNeighborInteraction = function(theta1, theta2) {
+    return Math.cos(theta1 - theta2)
+  };
+  XY.prototype.flipChain = function(indices) {
+    var Ø = Math.random() * 2 * Math.PI;
+
+    indices.forEach(function (index) { 
+      lattice[index]["spin"] = (Math.PI + 2*Ø - lattice[index]["spin"]) % (2 * Math.PI);
+    });
+    return indices
+  };
+  XY.prototype.averageSites = function(sites) {
+    var sum = sites.map(function(j) {
+      return lattice[j]["spin"];
+    }).reduce(function(a, b) {
+      return a + b;
+    }, 0);
+    return sum / sites.length;
+  };
+  XY.prototype.randomSpin = function() {
+    return Math.random() * 2 * Math.PI;
+  };
+  XY.prototype.render = function(value) {
+    rectangles
+      .attr("x", function (d) { return d.x; })
+      .attr("y", function (d) { return d.y; })
+      .attr("height", function (d) { return d.height; })
+      .attr("width", function (d) { return d.width; })
+      .style("fill", function(d) { 
+        var b = Math.floor(127 + 127*Math.sin(d.spin));
+        var g = Math.floor(127 + 127*Math.cos(d.spin));
+        return "rgb(0,"+b+","+g+")"; 
+      });
+  };
 
   var models = {
-    ising: function(lattice) {
-      
-    },
-    xy: function(lattice) {
-      
-    },
+    ising: new Ising(), 
+    xy: new XY()
   };
 
   function getNeighbors(index) {
@@ -184,7 +254,7 @@
         getNeighbors(index).forEach(function (neighbor) { 
           if ( 
             !(neighbor in chain) 
-            && ( Math.random() < (1 - Math.exp(-2*lattice[index]["spin"]*lattice[neighbor]["spin"]/T)) )
+            && ( Math.random() < (1 - Math.exp(-2*model.nearestNeighborInteraction(lattice[index]["spin"],lattice[neighbor]["spin"])/T)) )
           ) { 
             chain[neighbor] = true;
             newSites[neighbor] = true;
@@ -196,13 +266,6 @@
     return Object.keys(chain);
   }
 
-  function flipChain(indices) {
-    indices.forEach(function (index) { 
-      lattice[index]["spin"] *= -1;
-    });
-    return indices
-  }
-
   var algorithms = {
     metropolis: function() {
       var 
@@ -210,37 +273,22 @@
         Edelta = 0;
 
       getNeighbors(index).forEach(function (neighbor) { 
-        Edelta -= 2 * lattice[index]["spin"] * lattice[neighbor]["spin"];
+        Edelta -= 2 * model.nearestNeighborInteraction(lattice[index]["spin"], lattice[neighbor]["spin"]);
       });
       if (Math.random() < Math.exp(Edelta/T)) {
-        lattice[index]["spin"] *= -1;
+        model.flipChain([index]);
       }
       return [index];
     },
     wolff: function() {
-      return flipChain(growChain()); // return modified indices
+      return model.flipChain(growChain()); // return modified indices
     },
   };
+  algorithm = algorithms.wolff,
+  model = models.ising;
 
-  var 
-    algorithm = algorithms.wolff,
-    model = models.ising;
-
-  function drawGraph() {
-    var indices = algorithm();
-
-    // rectangles = svg.selectAll("rect")
-    //   .data(indices.map(function(index) {
-    //     return lattice[index];
-    //   })); // get rectangles whose spins have been modified
-    
-    rectangles
-      .attr("x", function (d) { return d.x; })
-      .attr("y", function (d) { return d.y; })
-      .attr("height", function (d) { return d.height; })
-      .attr("width", function (d) { return d.width; })
-      .style("fill", function(d) { return (d.spin == -1) ? "black" : "white"; });
-
+  function drawGraph() {   
+    model.render(algorithm());
   }
 
   function play() {
@@ -269,6 +317,7 @@
   zoom.scale(N/zoomFactor);
   svg.call(zoom);
 
+  initLattice(N);
   play();
 
 })();

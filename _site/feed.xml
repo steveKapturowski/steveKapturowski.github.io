@@ -23,30 +23,52 @@
   transform: rotate(90deg);
   -moz-transform: rotate(90deg);
 }
+input[type=range] {
+  -webkit-appearance: none;
+  margin: 14px 0;
+  width: 20%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 20%;
+  height: 7.4px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  background: #3071a9;
+  border-radius: 1.3px;
+  border: 0.2px solid #010101;
+  margin-top: -12px;
+}
+input[type=range]::-webkit-slider-thumb {
+  box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+  border: 1px solid #000000;
+  height: 14px;
+  width: 16px;
+  border-radius: 3px;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -3px;
+}
+
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;center&gt;
   &lt;p&gt;
-    &lt;input id=&quot;temperature&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot; list=&quot;tickmarks&quot; /&gt;
-&lt;!--     &lt;datalist id=&quot;tickmarks&quot;&gt;
-      &lt;option&gt;0&lt;/option&gt;
-      &lt;option&gt;1&lt;/option&gt;
-      &lt;option&gt;2&lt;/option&gt;
-      &lt;option&gt;3&lt;/option&gt;
-      &lt;option&gt;4&lt;/option&gt;
-      &lt;option&gt;5&lt;/option&gt;
-    &lt;/datalist&gt; --&gt;
-    &lt;label&gt; Temperature [kT/J]&lt;/label&gt;
+    &lt;input id=&quot;temperature&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot; ticks=&quot;true&quot; /&gt;
+    &lt;label style=&quot;font-size:17px&quot;&gt;Temperature [kT/J]&lt;/label&gt;
   &lt;/p&gt;
   &lt;p&gt;
     &lt;foo&gt;&lt;/foo&gt;
-    &lt;!-- &lt;input id=&quot;speed&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot;&gt;&lt;label&gt;Speed&lt;/label&gt; --&gt;
   &lt;/p&gt;
   &lt;p&gt;
-&lt;!--     &lt;select id=&quot;model&quot;&gt;
+    &lt;select id=&quot;model&quot;&gt;
       &lt;option value=&quot;ising&quot;&gt;Ising&lt;/option&gt;
       &lt;option value=&quot;xy&quot;&gt;XY&lt;/option&gt;
-    &lt;/select&gt; --&gt;
+    &lt;/select&gt;
     &lt;select id=&quot;algorithm&quot;&gt;
       &lt;option value=&quot;wolff&quot;&gt;Wolff&lt;/option&gt;
       &lt;option value=&quot;metropolis&quot;&gt;Metropolis&lt;/option&gt;
@@ -56,7 +78,7 @@
 
 &lt;script src=&quot;http://d3js.org/d3.v3.min.js&quot;&gt;&lt;/script&gt;
 
-&lt;script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
 (function() {
   &quot;use strict&quot;;
 
@@ -73,6 +95,8 @@
     N = 48,
     dim = W/N,
 
+    model,
+    algorithm,
     rectangles,
     lattice,
     timer;
@@ -95,7 +119,7 @@
       var spin;
 
       if ( lattice == null ) {
-        spin = (Math.random() &lt; .5) ? 1 : -1;
+        spin = model.randomSpin();
       } else {
         var oldX = Math.floor((x + .5) * N/newN);
         var oldY = Math.floor((y + .5) * N/newN);
@@ -103,14 +127,7 @@
 
         var sites = getNeighbors(index);
         sites.push(index);
-
-        var sum = sites.map(function(j) {
-          return lattice[j][&quot;spin&quot;];
-        }).reduce(function(a, b) {
-          return a + b;
-        }, 0);
-
-        spin = (Math.random() &gt; (sum+5)/10) ? -1 : 1;
+        spin = model.averageSites(sites);
       }
         
       newLattice[i] = {
@@ -127,33 +144,86 @@
       .data(newLattice)
       .enter()
       .append(&quot;rect&quot;);
+    model.render();
 
-    rectangles
-      .attr(&quot;x&quot;, function (e) { return e.x; })
-      .attr(&quot;y&quot;, function (e) { return e.y; })
-      .attr(&quot;height&quot;, function (e) { return e.height; })
-      .attr(&quot;width&quot;, function (e) { return e.width; })
-      .style(&quot;fill&quot;, function(e) { return (e.spin == 1) ? &quot;black&quot; : &quot;white&quot;; });
-    
     N = newN;
     dim = newDim;
     lattice = newLattice;
   }
-  initLattice(N);
-
 
   function Ising () {}
-  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {};
-  Ising.prototype.flipSpin = function() {};
-  Ising.prototype.render = function() {};
+  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {
+    return s1 * s2
+  };
+  Ising.prototype.flipChain = function(indices) {
+    indices.forEach(function (index) { 
+      lattice[index][&quot;spin&quot;] *= -1;
+    });
+    return indices
+  };
+  Ising.prototype.averageSites = function(sites) {
+    var sum = sites.map(function(j) {
+      return lattice[j][&quot;spin&quot;];
+    }).reduce(function(a, b) {
+      return a + b;
+    }, 0);
+    return (Math.random() &gt; (sum+5)/10) ? -1 : 1;
+  };
+  Ising.prototype.randomSpin = function() {
+    return (Math.random() &gt; .5) ? 1 : -1;
+  };
+  Ising.prototype.render = function(value) {
+    // rectangles = svg.selectAll(&quot;rect&quot;)
+    //   .data(indices.map(function(index) {
+    //     return lattice[index];
+    //   })); // get rectangles whose spins have been modified
+    rectangles
+      .attr(&quot;x&quot;, function (d) { return d.x; })
+      .attr(&quot;y&quot;, function (d) { return d.y; })
+      .attr(&quot;height&quot;, function (d) { return d.height; })
+      .attr(&quot;width&quot;, function (d) { return d.width; })
+      .style(&quot;fill&quot;, function(d) { return (d.spin == -1) ? &quot;black&quot; : &quot;white&quot;; });
+  };
+
+  function XY () {}
+  XY.prototype.nearestNeighborInteraction = function(theta1, theta2) {
+    return Math.cos(theta1 - theta2)
+  };
+  XY.prototype.flipChain = function(indices) {
+    var Ø = Math.random() * 2 * Math.PI;
+
+    indices.forEach(function (index) { 
+      lattice[index][&quot;spin&quot;] = (Math.PI + 2*Ø - lattice[index][&quot;spin&quot;]) % (2 * Math.PI);
+    });
+    return indices
+  };
+  XY.prototype.averageSites = function(sites) {
+    var sum = sites.map(function(j) {
+      return lattice[j][&quot;spin&quot;];
+    }).reduce(function(a, b) {
+      return a + b;
+    }, 0);
+    return sum / sites.length;
+  };
+  XY.prototype.randomSpin = function() {
+    return Math.random() * 2 * Math.PI;
+  };
+  XY.prototype.render = function(value) {
+    rectangles
+      .attr(&quot;x&quot;, function (d) { return d.x; })
+      .attr(&quot;y&quot;, function (d) { return d.y; })
+      .attr(&quot;height&quot;, function (d) { return d.height; })
+      .attr(&quot;width&quot;, function (d) { return d.width; })
+      .style(&quot;fill&quot;, function(d) { 
+        var b = Math.floor(127 + 127*Math.sin(d.spin));
+        var g = Math.floor(127 + 127*Math.cos(d.spin));
+        return &quot;rgb(0,&quot;+b+&quot;,&quot;+g+&quot;)&quot;; 
+      });
+  };
 
   var models = {
-    ising: function(lattice) {
-      
-    },
-    xy: function(lattice) {
-      
-    },
+    ising: new Ising(), 
+    xy: new XY()
   };
 
   function getNeighbors(index) {
@@ -194,7 +264,7 @@
         getNeighbors(index).forEach(function (neighbor) { 
           if ( 
             !(neighbor in chain) 
-            &amp;&amp; ( Math.random() &lt; (1 - Math.exp(-2*lattice[index][&quot;spin&quot;]*lattice[neighbor][&quot;spin&quot;]/T)) )
+            &amp;&amp; ( Math.random() &lt; (1 - Math.exp(-2*model.nearestNeighborInteraction(lattice[index][&quot;spin&quot;],lattice[neighbor][&quot;spin&quot;])/T)) )
           ) { 
             chain[neighbor] = true;
             newSites[neighbor] = true;
@@ -206,13 +276,6 @@
     return Object.keys(chain);
   }
 
-  function flipChain(indices) {
-    indices.forEach(function (index) { 
-      lattice[index][&quot;spin&quot;] *= -1;
-    });
-    return indices
-  }
-
   var algorithms = {
     metropolis: function() {
       var 
@@ -220,37 +283,22 @@
         Edelta = 0;
 
       getNeighbors(index).forEach(function (neighbor) { 
-        Edelta -= 2 * lattice[index][&quot;spin&quot;] * lattice[neighbor][&quot;spin&quot;];
+        Edelta -= 2 * model.nearestNeighborInteraction(lattice[index][&quot;spin&quot;], lattice[neighbor][&quot;spin&quot;]);
       });
       if (Math.random() &lt; Math.exp(Edelta/T)) {
-        lattice[index][&quot;spin&quot;] *= -1;
+        model.flipChain([index]);
       }
       return [index];
     },
     wolff: function() {
-      return flipChain(growChain()); // return modified indices
+      return model.flipChain(growChain()); // return modified indices
     },
   };
+  algorithm = algorithms.wolff,
+  model = models.ising;
 
-  var 
-    algorithm = algorithms.wolff,
-    model = models.ising;
-
-  function drawGraph() {
-    var indices = algorithm();
-
-    // rectangles = svg.selectAll(&quot;rect&quot;)
-    //   .data(indices.map(function(index) {
-    //     return lattice[index];
-    //   })); // get rectangles whose spins have been modified
-    
-    rectangles
-      .attr(&quot;x&quot;, function (d) { return d.x; })
-      .attr(&quot;y&quot;, function (d) { return d.y; })
-      .attr(&quot;height&quot;, function (d) { return d.height; })
-      .attr(&quot;width&quot;, function (d) { return d.width; })
-      .style(&quot;fill&quot;, function(d) { return (d.spin == -1) ? &quot;black&quot; : &quot;white&quot;; });
-
+  function drawGraph() {   
+    model.render(algorithm());
   }
 
   function play() {
@@ -279,6 +327,7 @@
   zoom.scale(N/zoomFactor);
   svg.call(zoom);
 
+  initLattice(N);
   play();
 
 })();
