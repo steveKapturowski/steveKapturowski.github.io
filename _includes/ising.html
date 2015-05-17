@@ -51,7 +51,11 @@
     xmax   = 1.5,
     rate   = 1 / 10000,
     T = 2.5,
+    N = 48,
+    dim = W/N,
 
+    rectangles,
+    lattice,
     timer;
 
 
@@ -60,36 +64,41 @@
       .attr("width", W)
       .attr("height", H)
 
-  var N = 40;
-  var dim = W/N;
-  var lattice = new Array(Math.pow(N, 2));
+  function initLattice() {
+    var lattice = new Array(Math.pow(N, 2));
+    for (var i=0; i < Math.pow(N, 2); i++) {
+      var x = i % N;
+      var y = Math.floor(i / N);
 
-  for (var i=0; i < Math.pow(N, 2); i++) {
-    var x = i % N;
-    var y = Math.floor(i / N);
+      lattice[i] = {
+        "x": x*dim,
+        "y": y*dim,
+        "height": dim,
+        "width": dim,
+        "spin": (Math.random() < .9) ? 1 : -1
+      };
+    }
 
-    lattice[i] = {
-      "x": x*dim,
-      "y": y*dim,
-      "height": dim,
-      "width": dim,
-      "spin": (Math.random() < .9) ? 1 : -1
-    };
+    d3.select("svg").selectAll("rect").remove();
+    rectangles = svg.selectAll("rect")
+      .data(lattice)
+      .enter()
+      .append("rect");
+
+    rectangles
+      .attr("x", function (d) { return d.x; })
+      .attr("y", function (d) { return d.y; })
+      .attr("height", function (d) { return d.height; })
+      .attr("width", function (d) { return d.width; })
+      .style("fill", function(d) { return (d.spin == 1) ? "black" : "white"; });
+    
+    return lattice;
   }
+  lattice = initLattice();
 
-  var rectangles = svg.selectAll("rect")
-    .data(lattice)
-    .enter()
-    .append("rect");
-
-  var rectangleAttributes = rectangles
-    .attr("x", function (d) { return d.x; })
-    .attr("y", function (d) { return d.y; })
-    .attr("height", function (d) { return d.height; })
-    .attr("width", function (d) { return d.width; })
-    .style("fill", function(d) { return (d.spin == 1) ? "black" : "white"; });
-
-
+  // Required class methods:
+  //  flipSpin(indices)
+  //  render(indices)
   var models = {
     ising: function(lattice) {
       
@@ -131,17 +140,14 @@
 
     while ( Object.keys(addedSites).length > 0 ) {
       newSites = {};
-
       Object.keys(addedSites).forEach(function (key) { 
         index = parseInt(key);
-        // document.write(index, " : ");
 
         getNeighbors(index).forEach(function (neighbor) { 
           if ( 
             !(neighbor in chain) 
             && ( Math.random() < (1 - Math.exp(-2*lattice[index]["spin"]*lattice[neighbor]["spin"]/T)) )
           ) { 
-            // document.write("fuck");
             chain[neighbor] = true;
             newSites[neighbor] = true;
           }
@@ -149,14 +155,14 @@
       });
       addedSites = newSites;
     }
-    return chain;
+    return Object.keys(chain);
   }
 
   function flipChain(indices) {
-    // document.write(Object.keys(indices).length, " : ");
-    Object.keys(indices).forEach(function (key) { 
-      lattice[key]["spin"] *= -1;
+    indices.forEach(function (index) { 
+      lattice[index]["spin"] *= -1;
     });
+    return indices
   }
 
   var algorithms = {
@@ -171,9 +177,10 @@
       if (Math.random() < Math.exp(Edelta/T)) {
         lattice[index]["spin"] *= -1;
       }
+      return [index];
     },
     wolff: function() {
-      flipChain(growChain());
+      return flipChain(growChain()); // return modified indices
     },
   };
 
@@ -182,14 +189,14 @@
     model = models.ising;
 
   function drawGraph() {
-    algorithm();
+    var indices = algorithm();
 
     // rectangles = svg.selectAll("rect")
-    // .data(lattice)
-    // .enter()
-    // .append("rect");
+    //   .data(indices.map(function(index) {
+    //     return lattice[index];
+    //   })); // get rectangles whose spins have been modified
     
-    rectangleAttributes = rectangles
+    rectangles
       .attr("x", function (d) { return d.x; })
       .attr("y", function (d) { return d.y; })
       .attr("height", function (d) { return d.height; })
@@ -219,11 +226,14 @@
     
   }
 
-  d3.slider;
   d3.select("#temperature").on("change", function() { T = this.value; });
-  // d3.select("#size").on("change", function() { L = +this.value; redraw(); });
   d3.select("#model").on("change", function() { model = models[this.value]; redraw(); });
   d3.select("#algorithm").on("change", function() { algorithm = algorithms[this.value]; });
+
+  var zoomFactor = 16;
+  var zoom = d3.behavior.zoom().scaleExtent([.5, 4]).on("zoom", function() { N = Math.floor(zoomFactor*zoom.scale()); dim = W/N; lattice = initLattice(); });
+  zoom.scale(N/zoomFactor);
+  svg.call(zoom);
 
   play();
 
