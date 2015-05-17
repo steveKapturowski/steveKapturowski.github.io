@@ -186,12 +186,14 @@ If you identify $$\beta \leftrightarrow 1/\hbar$$ this is exactly analogous to t
 
 ## Links and Resources
 
-[[1] Source code](https://github.com/steveKapturowski/QFT_Project)
+[[1] Source Code](https://github.com/steveKapturowski/QFT_Project)
 
 [[2] Stanford Handout on the Ising Model](http://micro.stanford.edu/~caiwei/me334/Chap12_Ising_Model_v04.pdf)
 
 [[3] The Renormalization Group for Ising Spins](http://math.arizona.edu/~tgk/541/chap3.pdf)
 
-[[4] Exact Solution of the 2D Ising Model](http://www.peliti.org/Notes/ising2/vdov.html)
+[[4] More Renormalization Group Methods](http://www-f1.ijs.si/~vilfan/SM/ln4b.pdf)
 
-[[5] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)
+[[5] Exact Solution of the 2D Ising Model](http://www.peliti.org/Notes/ising2/vdov.html)
+
+[[6] Lattice QCD for Novices](http://arxiv.org/pdf/hep-lat/0506036v1.pdf)

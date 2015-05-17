@@ -27,7 +27,16 @@
 &lt;/head&gt;
 &lt;center&gt;
   &lt;p&gt;
-    &lt;input id=&quot;temperature&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot; /&gt;&lt;label&gt; Temperature [kT/J]&lt;/label&gt;
+    &lt;input id=&quot;temperature&quot; type=&quot;range&quot; value=&quot;2.5&quot; min=&quot;0.0&quot; max=&quot;5.0&quot; step=&quot;0.01&quot; list=&quot;tickmarks&quot; /&gt;
+&lt;!--     &lt;datalist id=&quot;tickmarks&quot;&gt;
+      &lt;option&gt;0&lt;/option&gt;
+      &lt;option&gt;1&lt;/option&gt;
+      &lt;option&gt;2&lt;/option&gt;
+      &lt;option&gt;3&lt;/option&gt;
+      &lt;option&gt;4&lt;/option&gt;
+      &lt;option&gt;5&lt;/option&gt;
+    &lt;/datalist&gt; --&gt;
+    &lt;label&gt; Temperature [kT/J]&lt;/label&gt;
   &lt;/p&gt;
   &lt;p&gt;
     &lt;foo&gt;&lt;/foo&gt;
@@ -74,41 +83,70 @@
       .attr(&quot;width&quot;, W)
       .attr(&quot;height&quot;, H)
 
-  function initLattice() {
-    var lattice = new Array(Math.pow(N, 2));
-    for (var i=0; i &lt; Math.pow(N, 2); i++) {
-      var x = i % N;
-      var y = Math.floor(i / N);
+  function initLattice(n) {
+    var 
+      newN = n,
+      newDim = W/n,
+      newLattice = new Array(Math.pow(newN, 2));
 
-      lattice[i] = {
-        &quot;x&quot;: x*dim,
-        &quot;y&quot;: y*dim,
-        &quot;height&quot;: dim,
-        &quot;width&quot;: dim,
-        &quot;spin&quot;: (Math.random() &lt; .9) ? 1 : -1
+    for (var i=0; i &lt; Math.pow(newN, 2); i++) {
+      var x = i % newN;
+      var y = Math.floor(i / newN);
+      var spin;
+
+      if ( lattice == null ) {
+        spin = (Math.random() &lt; .5) ? 1 : -1;
+      } else {
+        var oldX = Math.floor((x + .5) * N/newN);
+        var oldY = Math.floor((y + .5) * N/newN);
+        var index = oldX + oldY * N;
+
+        var sites = getNeighbors(index);
+        sites.push(index);
+
+        var sum = sites.map(function(j) {
+          return lattice[j][&quot;spin&quot;];
+        }).reduce(function(a, b) {
+          return a + b;
+        }, 0);
+
+        spin = (Math.random() &gt; (sum+5)/10) ? -1 : 1;
+      }
+        
+      newLattice[i] = {
+        &quot;x&quot;: x*newDim,
+        &quot;y&quot;: y*newDim,
+        &quot;height&quot;: newDim,
+        &quot;width&quot;: newDim,
+        &quot;spin&quot;: spin,
       };
     }
 
     d3.select(&quot;svg&quot;).selectAll(&quot;rect&quot;).remove();
     rectangles = svg.selectAll(&quot;rect&quot;)
-      .data(lattice)
+      .data(newLattice)
       .enter()
       .append(&quot;rect&quot;);
 
     rectangles
-      .attr(&quot;x&quot;, function (d) { return d.x; })
-      .attr(&quot;y&quot;, function (d) { return d.y; })
-      .attr(&quot;height&quot;, function (d) { return d.height; })
-      .attr(&quot;width&quot;, function (d) { return d.width; })
-      .style(&quot;fill&quot;, function(d) { return (d.spin == 1) ? &quot;black&quot; : &quot;white&quot;; });
+      .attr(&quot;x&quot;, function (e) { return e.x; })
+      .attr(&quot;y&quot;, function (e) { return e.y; })
+      .attr(&quot;height&quot;, function (e) { return e.height; })
+      .attr(&quot;width&quot;, function (e) { return e.width; })
+      .style(&quot;fill&quot;, function(e) { return (e.spin == 1) ? &quot;black&quot; : &quot;white&quot;; });
     
-    return lattice;
+    N = newN;
+    dim = newDim;
+    lattice = newLattice;
   }
-  lattice = initLattice();
+  initLattice(N);
 
-  // Required class methods:
-  //  flipSpin(indices)
-  //  render(indices)
+
+  function Ising () {}
+  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {};
+  Ising.prototype.flipSpin = function() {};
+  Ising.prototype.render = function() {};
+
   var models = {
     ising: function(lattice) {
       
@@ -232,16 +270,12 @@
     }
   }
 
-  function redraw() {
-    
-  }
-
   d3.select(&quot;#temperature&quot;).on(&quot;change&quot;, function() { T = this.value; });
-  d3.select(&quot;#model&quot;).on(&quot;change&quot;, function() { model = models[this.value]; redraw(); });
+  d3.select(&quot;#model&quot;).on(&quot;change&quot;, function() { model = models[this.value]; });
   d3.select(&quot;#algorithm&quot;).on(&quot;change&quot;, function() { algorithm = algorithms[this.value]; });
 
-  var zoomFactor = 16;
-  var zoom = d3.behavior.zoom().scaleExtent([.5, 4]).on(&quot;zoom&quot;, function() { N = Math.floor(zoomFactor*zoom.scale()); dim = W/N; lattice = initLattice(); });
+  var zoomFactor = 64;
+  var zoom = d3.behavior.zoom().scaleExtent([1/16, 1]).on(&quot;zoom&quot;, function() {initLattice(2*Math.floor(zoomFactor*zoom.scale()/2)); });
   zoom.scale(N/zoomFactor);
   svg.call(zoom);
 
@@ -644,15 +678,17 @@ function drawArrow(t) {
 
 &lt;h2 id=&quot;links-and-resources&quot;&gt;Links and Resources&lt;/h2&gt;
 
-&lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;[1] Source code&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://github.com/steveKapturowski/QFT_Project&quot;&gt;[1] Source Code&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://micro.stanford.edu/~caiwei/me334/Chap12_Ising_Model_v04.pdf&quot;&gt;[2] Stanford Handout on the Ising Model&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&quot;http://math.arizona.edu/~tgk/541/chap3.pdf&quot;&gt;[3] The Renormalization Group for Ising Spins&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://www.peliti.org/Notes/ising2/vdov.html&quot;&gt;[4] Exact Solution of the 2D Ising Model&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://www-f1.ijs.si/~vilfan/SM/ln4b.pdf&quot;&gt;[4] More Renormalization Group Methods&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[5] Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.peliti.org/Notes/ising2/vdov.html&quot;&gt;[5] Exact Solution of the 2D Ising Model&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://arxiv.org/pdf/hep-lat/0506036v1.pdf&quot;&gt;[6] Lattice QCD for Novices&lt;/a&gt;&lt;/p&gt;
 </description>
         <pubDate>Sat, 16 May 2015 00:00:00 -0600</pubDate>
         <link>http://blog.stevenkapturowski.com/ising-model</link>

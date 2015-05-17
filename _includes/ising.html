@@ -17,7 +17,16 @@
 </head>
 <center>
   <p>
-    <input id="temperature" type="range" value="2.5" min="0.0" max="5.0" step="0.01"><label> Temperature [kT/J]</label>
+    <input id="temperature" type="range" value="2.5" min="0.0" max="5.0" step="0.01" list="tickmarks">
+<!--     <datalist id="tickmarks">
+      <option>0</option>
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+    </datalist> -->
+    <label> Temperature [kT/J]</label>
   </p>
   <p>
     <foo></foo>
@@ -64,41 +73,70 @@
       .attr("width", W)
       .attr("height", H)
 
-  function initLattice() {
-    var lattice = new Array(Math.pow(N, 2));
-    for (var i=0; i < Math.pow(N, 2); i++) {
-      var x = i % N;
-      var y = Math.floor(i / N);
+  function initLattice(n) {
+    var 
+      newN = n,
+      newDim = W/n,
+      newLattice = new Array(Math.pow(newN, 2));
 
-      lattice[i] = {
-        "x": x*dim,
-        "y": y*dim,
-        "height": dim,
-        "width": dim,
-        "spin": (Math.random() < .9) ? 1 : -1
+    for (var i=0; i < Math.pow(newN, 2); i++) {
+      var x = i % newN;
+      var y = Math.floor(i / newN);
+      var spin;
+
+      if ( lattice == null ) {
+        spin = (Math.random() < .5) ? 1 : -1;
+      } else {
+        var oldX = Math.floor((x + .5) * N/newN);
+        var oldY = Math.floor((y + .5) * N/newN);
+        var index = oldX + oldY * N;
+
+        var sites = getNeighbors(index);
+        sites.push(index);
+
+        var sum = sites.map(function(j) {
+          return lattice[j]["spin"];
+        }).reduce(function(a, b) {
+          return a + b;
+        }, 0);
+
+        spin = (Math.random() > (sum+5)/10) ? -1 : 1;
+      }
+        
+      newLattice[i] = {
+        "x": x*newDim,
+        "y": y*newDim,
+        "height": newDim,
+        "width": newDim,
+        "spin": spin,
       };
     }
 
     d3.select("svg").selectAll("rect").remove();
     rectangles = svg.selectAll("rect")
-      .data(lattice)
+      .data(newLattice)
       .enter()
       .append("rect");
 
     rectangles
-      .attr("x", function (d) { return d.x; })
-      .attr("y", function (d) { return d.y; })
-      .attr("height", function (d) { return d.height; })
-      .attr("width", function (d) { return d.width; })
-      .style("fill", function(d) { return (d.spin == 1) ? "black" : "white"; });
+      .attr("x", function (e) { return e.x; })
+      .attr("y", function (e) { return e.y; })
+      .attr("height", function (e) { return e.height; })
+      .attr("width", function (e) { return e.width; })
+      .style("fill", function(e) { return (e.spin == 1) ? "black" : "white"; });
     
-    return lattice;
+    N = newN;
+    dim = newDim;
+    lattice = newLattice;
   }
-  lattice = initLattice();
+  initLattice(N);
 
-  // Required class methods:
-  //  flipSpin(indices)
-  //  render(indices)
+
+  function Ising () {}
+  Ising.prototype.nearestNeighborInteraction = function(s1, s2) {};
+  Ising.prototype.flipSpin = function() {};
+  Ising.prototype.render = function() {};
+
   var models = {
     ising: function(lattice) {
       
@@ -222,16 +260,12 @@
     }
   }
 
-  function redraw() {
-    
-  }
-
   d3.select("#temperature").on("change", function() { T = this.value; });
-  d3.select("#model").on("change", function() { model = models[this.value]; redraw(); });
+  d3.select("#model").on("change", function() { model = models[this.value]; });
   d3.select("#algorithm").on("change", function() { algorithm = algorithms[this.value]; });
 
-  var zoomFactor = 16;
-  var zoom = d3.behavior.zoom().scaleExtent([.5, 4]).on("zoom", function() { N = Math.floor(zoomFactor*zoom.scale()); dim = W/N; lattice = initLattice(); });
+  var zoomFactor = 64;
+  var zoom = d3.behavior.zoom().scaleExtent([1/16, 1]).on("zoom", function() {initLattice(2*Math.floor(zoomFactor*zoom.scale()/2)); });
   zoom.scale(N/zoomFactor);
   svg.call(zoom);
 
