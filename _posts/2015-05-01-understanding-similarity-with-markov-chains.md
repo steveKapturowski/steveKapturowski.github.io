@@ -6,13 +6,13 @@ summary:   Facebook is a graph. Twitter is a graph. The internet is a graph. Alm
 permalink: understanding-similarity
 ---
 
-Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you're a data scientist, it's pretty important to know how to deal with graphs. It's a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think.
+Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure if you squint kinda funny and look at it from the right angle. So if you're a data scientist, it's pretty important to know how to deal with graphs. It's a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think.
 
 ## Shortest Path
 
-Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra's algorithm. 
+Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes. In some ways this makes a lot of sense, particularly if you start thinking about your data as lying on some kind of submanifold in feature space (which you tend to do if you have an affinity for differential geometry). As it turns out, as the number of datapoints sampled from this hypothetical distribution goes to infinity you can meaningfully talk about the shortest path distance converging to the distance along a geodesic in the data manifold.
 
-For certain types of graphs and applications this might be good enough, but many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: 
+Cool. But for certain types of graphs and applications this might not be good enough, and many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: 
 
 $$ P(deg(v)=k) \sim k^{-\gamma} $$ 
 
@@ -93,7 +93,7 @@ Alternatively, given any <i>two</i> vertices, we compute their PageRank's separa
 
 ## Commute Times and Hitting Times
 
-[Hitting times](http://en.wikipedia.org/wiki/Hitting_time) are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it's not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> $$ C_{ij} \equiv h_{ij} + h_{ji} $$ as the expected time to travel from i to j and then return back to i. 
+[Hitting times](http://en.wikipedia.org/wiki/Hitting_time) are a very interesting property that can capture a considerable amount of the connectivity structure of a graph. But depending on our application they might not map to the notion of similariy we want because it's not symmetric between vertices, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> $$ C_{ij} \equiv h_{ij} + h_{ji} $$ as the expected time to travel from i to j and then return back to i. 
 
 Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?
 
@@ -148,11 +148,16 @@ def truncatedHittingTimes(W, i, T=100):
 	return h + T*(one_vector-used_probability)
 {% endhighlight %}
 
-That's all! Hopefully you've found it all an interesting read and are able to break out some of these ideas the next time you're faced with a nasty graph of data you need to make sense of. I've tried to be fairly thorough, but it's very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!
+
+## Coda
+
+This still isn't the end of the story, as e.g. [Luxburg et al. 2011](https://arxiv.org/pdf/1003.1266.pdf) study the behavior of commute times in certain types of random graph and prove that as the size of these graphs tends to infinity the commute times converge to purely local quantities with respect to the considered vertices. Thus for such graphs commute times may fail to convey any meaninful information as a distance measure! [Diffusion distance](http://www.math.pku.edu.cn/teachers/yaoy/Fall2011/lecture10.pdf) could be a good alternative if you're faced with this situation, but there's an important moral here: much like machine learning algorithms there's no free lunch when it comes to measuring distance on graphs. Always think about the failure cases and never try just one.
 
 ## Links and Resources
 
 [D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.](http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf)
+
+[U. Luxburg, A. Radl, M. Hein, Hitting and Commute Times in Large Random Neighborhood Graphs.](http://jmlr.org/papers/volume15/vonluxburg14a/vonluxburg14a.pdf)
 
 
 

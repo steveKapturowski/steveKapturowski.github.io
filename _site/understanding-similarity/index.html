@@ -99,17 +99,17 @@
   <h1>Understanding Similarity With Markov Chains</h1>
   <span class="post-meta">May 1, 2015</span><br>
   
-  <span class="post-meta small">9 minute read</span>
+  <span class="post-meta small">10 minute read</span>
 </div>
 
 <article class="post-content">
-  <p>Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you’re a data scientist, it’s pretty important to know how to deal with graphs. It’s a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think.</p>
+  <p>Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure if you squint kinda funny and look at it from the right angle. So if you’re a data scientist, it’s pretty important to know how to deal with graphs. It’s a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think.</p>
 
 <h2 id="shortest-path">Shortest Path</h2>
 
-<p>Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes, which can easily be computed using Dijkstra’s algorithm. </p>
+<p>Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes. In some ways this makes a lot of sense, particularly if you start thinking about your data as lying on some kind of submanifold in feature space (which you tend to do if you have an affinity for differential geometry). As it turns out, as the number of datapoints sampled from this hypothetical distribution goes to infinity you can meaningfully talk about the shortest path distance converging to the distance along a geodesic in the data manifold.</p>
 
-<p>For certain types of graphs and applications this might be good enough, but many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: </p>
+<p>Cool. But for certain types of graphs and applications this might not be good enough, and many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: </p>
 
 <script type="math/tex; mode=display"> P(deg(v)=k) \sim k^{-\gamma} </script>
 
@@ -188,7 +188,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <h2 id="commute-times-and-hitting-times">Commute Times and Hitting Times</h2>
 
-<p><a href="http://en.wikipedia.org/wiki/Hitting_time">Hitting times</a> are a very interesting property that capture a considerable amount of the connectivity structure of a graph. But they might not map to the notion of similariy we want because it’s not symmetric, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> <script type="math/tex"> C_{ij} \equiv h_{ij} + h_{ji} </script> as the expected time to travel from i to j and then return back to i. </p>
+<p><a href="http://en.wikipedia.org/wiki/Hitting_time">Hitting times</a> are a very interesting property that can capture a considerable amount of the connectivity structure of a graph. But depending on our application they might not map to the notion of similariy we want because it’s not symmetric between vertices, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> <script type="math/tex"> C_{ij} \equiv h_{ij} + h_{ji} </script> as the expected time to travel from i to j and then return back to i. </p>
 
 <p>Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?</p>
 
@@ -240,11 +240,15 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 	<span class="k">return</span> <span class="n">h</span> <span class="o">+</span> <span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="n">one_vector</span><span class="o">-</span><span class="n">used_probability</span><span class="p">)</span></code></pre></div>
 
-<p>That’s all! Hopefully you’ve found it all an interesting read and are able to break out some of these ideas the next time you’re faced with a nasty graph of data you need to make sense of. I’ve tried to be fairly thorough, but it’s very possible I let errors slip by or left out interesting alternatives; so as always, feedback and corrections are greatly appreciated!</p>
+<h2 id="coda">Coda</h2>
+
+<p>This still isn’t the end of the story, as e.g. <a href="https://arxiv.org/pdf/1003.1266.pdf">Luxburg et al. 2011</a> study the behavior of commute times in certain types of random graph and prove that as the size of these graphs tends to infinity the commute times converge to purely local quantities with respect to the considered vertices. Thus for such graphs commute times may fail to convey any meaninful information as a distance measure! <a href="http://www.math.pku.edu.cn/teachers/yaoy/Fall2011/lecture10.pdf">Diffusion distance</a> could be a good alternative if you’re faced with this situation, but there’s an important moral here: much like machine learning algorithms there’s no free lunch when it comes to measuring distance on graphs. Always think about the failure cases and never try just one.</p>
 
 <h2 id="links-and-resources">Links and Resources</h2>
 
 <p><a href="http://www.cis.upenn.edu/~ccb/publications/graph-laplacian-affinity-measures.pdf">D. Rao, D. Yarowsky, C. Callison-Burch, Affinity Measures based on the Graph Laplacian.</a></p>
+
+<p><a href="http://jmlr.org/papers/volume15/vonluxburg14a/vonluxburg14a.pdf">U. Luxburg, A. Radl, M. Hein, Hitting and Commute Times in Large Random Neighborhood Graphs.</a></p>
 
 
 </article>
