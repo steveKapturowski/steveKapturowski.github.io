@@ -62,7 +62,7 @@ input[type=range]::-webkit-slider-thumb {
     &lt;label style=&quot;font-size:17px&quot;&gt;Temperature [kT/J]&lt;/label&gt;
   &lt;/p&gt;
   &lt;p&gt;
-    &lt;foo&gt;&lt;/foo&gt;
+    &lt;div id=&quot;simulation&quot;&gt;&lt;/div&gt;
   &lt;/p&gt;
   &lt;p&gt;
     &lt;select id=&quot;model&quot;&gt;
@@ -102,7 +102,7 @@ input[type=range]::-webkit-slider-thumb {
     timer;
 
 
-  var svg = d3.select(&quot;foo&quot;)
+  var svg = d3.select(&quot;div#simulation&quot;)
     .append(&quot;svg&quot;)
       .attr(&quot;width&quot;, W)
       .attr(&quot;height&quot;, H)
