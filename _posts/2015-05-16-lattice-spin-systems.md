@@ -129,7 +129,7 @@ and can now go to sleep. . .But ho! I am not through with you yet:
 
 Every physics treatment of this algorithm that I've read feels as if it's described backwards, so I'm going to try doing things a bit differently.
 
-The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let $$P$$ denote the $$2^Nx2^N$$ transition matrix whose entries $$P_{AB}$$ represent the probability of transitioning from state $$A$$ to state $$B$$.
+The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let $$P$$ denote the $$2^N\times2^N$$ transition matrix whose entries $$P_{AB}$$ represent the probability of transitioning from state $$A$$ to state $$B$$.
 
 A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the [<i>detailed balance</i>](http://en.wikipedia.org/wiki/Detailed_balance) condition: 
 
