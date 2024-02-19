@@ -5,10 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Understanding Similarity With Markov Chains &#8211; Strange Matter - A fledgeling blog about math, machine learning, and black holes</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you&#39;re a data scientist, it&#39;s pretty important to know how to deal with graphs. It&#39;s a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think">
+    <meta name="description" content="Facebook is a graph. Twitter is a graph. The internet is a graph. Almost any other kind of data you can think of probably has some sort of graph structure. So if you&apos;re a data scientist, it&apos;s pretty important to know how to deal with graphs. It&apos;s a common question to ask how one can find things that are similar in a graph, but finding a good answer may not be as simple as you think">
     <meta name="author" content="Steven Kapturowski">
     <meta name="keywords" content="">
-    <link rel="canonical" href="http://blog.stevenkapturowski.com/understanding-similarity">
+    <link rel="canonical" href="http://localhost:4000/understanding-similarity">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
@@ -27,7 +27,7 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="Understanding Similarity With Markov Chains">
     <meta property="og:description" content="">
-    <meta property="og:url" content="http://blog.stevenkapturowski.com/understanding-similarity">
+    <meta property="og:url" content="http://localhost:4000/understanding-similarity">
     <meta property="og:site_name" content="Strange Matter - A fledgeling blog about math, machine learning, and black holes">
 
     <!-- Icons -->
@@ -52,7 +52,7 @@
     <header class="site-header px2 px-responsive">
   <div class="mt2 wrap">
     <div class="measure">
-      <a href="http://blog.stevenkapturowski.com" class="site-title">Strange Matter - A fledgeling blog about math, machine learning, and black holes</a>
+      <a href="http://localhost:4000" class="site-title">Strange Matter - A fledgeling blog about math, machine learning, and black holes</a>
       <nav class="site-nav right">
         <a href="/about/">About</a>
 <a href="/contact/">Contact</a>
@@ -109,11 +109,11 @@
 
 <p>Starting off with a simple first guess we could choose to measure similarity by the shortest path connecting two nodes. In some ways this makes a lot of sense, particularly if you start thinking about your data as lying on some kind of submanifold in feature space (which you tend to do if you have an affinity for differential geometry). As it turns out, as the number of datapoints sampled from this hypothetical distribution goes to infinity you can meaningfully talk about the shortest path distance converging to the distance along a geodesic in the data manifold.</p>
 
-<p>Cool. But for certain types of graphs and applications this might not be good enough, and many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law: </p>
+<p>Cool. But for certain types of graphs and applications this might not be good enough, and many naturally occurring graphs such as social networks and link graphs have degree distributions which roughly follow a power law:</p>
 
-<script type="math/tex; mode=display"> P(deg(v)=k) \sim k^{-\gamma} </script>
+\[P(deg(v)=k) \sim k^{-\gamma}\]
 
-<p>for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of <script type="math/tex">\{v\}</script> enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the <a href="http://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon">“Six degrees of Kevin Bacon”</a> game.</p>
+<p>for some constant $\gamma$. Most vertices will have small degree, but the presence of vertices which connect to a substantial proportion of \(\{v\}\) enables even the most disparate vertices to be connected by a short sequence of hops. This phenomena is well exemplified by the <a href="http://en.wikipedia.org/wiki/Six_Degrees_of_Kevin_Bacon">“Six degrees of Kevin Bacon”</a> game.</p>
 
 <!-- ## Bipartite Graphs
 
@@ -123,7 +123,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <h2 id="markov-chains">Markov Chains</h2>
 
-<p>The picture to have in your head when you think about Markov Chains is just a (possibly directed) graph where every node’s outgoing edge weights sum to one and so can be interpreted as probabilities. </p>
+<p>The picture to have in your head when you think about Markov Chains is just a (possibly directed) graph where every node’s outgoing edge weights sum to one and so can be interpreted as probabilities.</p>
 
 <center>
 	<img src="/images/sum_to_one.png" height="220" width="200" />
@@ -131,33 +131,33 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>Given any weighted graph we can always normalize the edge weights to satisfy this condition:</p>
 
-<script type="math/tex; mode=display"> P = D^{-1}W </script>
+\[P = D^{-1}W\]
 
-<p>where W is the weight matrix of the original graph, and D is a diagonal matrix defined by <script type="math/tex"> D_{ii} = \sum_j W_{ij} </script></p>
+<p>where W is the weight matrix of the original graph, and D is a diagonal matrix defined by \(D_{ii} = \sum_j W_{ij}\)</p>
 
-<p>Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities <script type="math/tex"> P_{ij} </script> for the edge leaving i and arriving at j. A Markov Chain is said to be <i>ergodic</i> if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is <i>aperiodic</i>. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because <a href="http://en.wikipedia.org/wiki/Markov_chain">wikipedia</a> does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic, with the periodicity of each state labeled:</p>
+<p>Starting at any vertex we can generate a random walk by repeatedly choosing a new vertex to move to according to the transition probabilities \(P_{ij}\) for the edge leaving i and arriving at j. A Markov Chain is said to be <i>ergodic</i> if (I) given any two states i and f there exists a path from i to f that can be traversed with nonzero probability, and (II) every state is <i>aperiodic</i>. Note, the Markov chain above is not ergodic because it fails condition (I): you get trapped in either states j or k and can’t make your way back to the other states. I won’t rigorously define what periodicity is meant here because <a href="http://en.wikipedia.org/wiki/Markov_chain">wikipedia</a> does a good enough job and this article is long enough as it is, but below are a couple of simple examples in which every state is periodic, with the periodicity of each state labeled:</p>
 
 <center>
 	<img src="/images/periodicity.png" height="220" width="200" />
 </center>
 
-<p>Consider a vector <script type="math/tex">\pi</script> which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to </p>
+<p>Consider a vector \(\pi\) which represents a probability distribution over each of the vertices. If we start with all of the probability mass centered on one vertex  and iterate the distribution according to</p>
 
-<script type="math/tex; mode=display"> \pi_k = \pi_{k-1}P \tag{1}</script>
+\[\pi_k = \pi_{k-1}P \tag{1}\]
 
-<p>then in fact this is the random walk we just described. More generally we can start with any initial distribution and we’ll end up with a kind of weighted average over random walks with different starting points. </p>
+<p>then in fact this is the random walk we just described. More generally we can start with any initial distribution and we’ll end up with a kind of weighted average over random walks with different starting points.</p>
 
-<p>A distribution <script type="math/tex">\pi_0</script> is called an equilibrium distribution if it satisfies:</p>
+<p>A distribution \(\pi_0\) is called an equilibrium distribution if it satisfies:</p>
 
-<script type="math/tex; mode=display"> \pi_0^T = \pi_0^T P </script>
+\[\pi_0^T = \pi_0^T P\]
 
 <h2 id="what-do-random-walks-give-us-that-shortest-paths-dont">What do Random Walks Give us that Shortest Paths Don’t?</h2>
 
-<p>Consider a vertex i adjacent to a high degree vertex j, and a vertex k which has i as its only neighbor. Intuitively, it should make sense that <script type="math/tex"> Sim(j, i) > Sim(i, k) </script> because their association is more uniquely distinguishing, but under path similarity they are the same.</p>
+<p>Consider a vertex i adjacent to a high degree vertex j, and a vertex k which has i as its only neighbor. Intuitively, it should make sense that \(Sim(j, i) &gt; Sim(i, k)\) because their association is more uniquely distinguishing, but under path similarity they are the same.</p>
 
 <p>Consider a random walk starting at i. If it hops to vertex j then at the next step the probability distribution would get smeared out over <i>every</i> vertex that j is connected to, so ultimately j will tend to end up with a low probability. Conversely, if the random walk hops over to k, then at the next step the <i>only</i> choice is for it to come back to i. In other words, the random walk can tell that there’s less randomness associated with these connections!</p>
 
-<p>It’s possible to define a variety of different notions of similarity based on Markov chains, but they basically all capture this key feature. There’s no clear way to say which is theoretically <i>best</i>, and if you have time it might be advisable to try several of them out and compare their performance on your particular data. </p>
+<p>It’s possible to define a variety of different notions of similarity based on Markov chains, but they basically all capture this key feature. There’s no clear way to say which is theoretically <i>best</i>, and if you have time it might be advisable to try several of them out and compare their performance on your particular data.</p>
 
 <p>Below I discuss some possible choices, how to compute them, and some of their important properties.</p>
 
@@ -165,13 +165,13 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>We can compute the personalized PageRank for some initial distribution via a power iteration as follows:</p>
 
-<script type="math/tex; mode=display"> \pi_t^T = \beta \pi_0^T + (1-\beta) \pi_{t-1}^T P </script>
+\[\pi_t^T = \beta \pi_0^T + (1-\beta) \pi_{t-1}^T P\]
 
-<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 
 
-<span class="c"># pi0 is any initial distribution</span>
-<span class="k">def</span> <span class="nf">personalizedPageRank</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">pi0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=.</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
+<span class="c1"># pi0 is any initial distribution</span>
+<span class="k">def</span> <span class="nf">personalizedPageRank</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">pi0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">.1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">30</span><span class="p">):</span>
 	<span class="n">D_inv</span> <span class="o">=</span> <span class="n">sparse</span><span class="o">.</span><span class="n">dia_matrix</span><span class="p">(</span><span class="n">W</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 	<span class="n">D_inv</span><span class="o">.</span><span class="n">setdiag</span><span class="p">([(</span><span class="ow">not</span> <span class="n">num</span> <span class="ow">or</span> <span class="n">num</span><span class="o">**-</span><span class="mi">1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">W</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">]])</span>
 	<span class="n">P</span> <span class="o">=</span> <span class="n">D_inv</span><span class="o">*</span><span class="n">W</span>
@@ -180,21 +180,21 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
 		<span class="n">pi_n</span> <span class="o">=</span> <span class="n">beta</span><span class="o">*</span><span class="n">pi0</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="n">pi_n</span><span class="o">*</span><span class="n">P</span>
 
-	<span class="k">return</span> <span class="n">pi_n</span></code></pre></div>
+	<span class="k">return</span> <span class="n">pi_n</span></code></pre></figure>
 
-<p>If you don’t need or want a symmetric notion of similarity then this might be enough: given <script type="math/tex">\pi_0</script> centered on vertex <script type="math/tex">v</script> you compute the PageRank and you take the vertices assigned the highest probability as the most similar.</p>
+<p>If you don’t need or want a symmetric notion of similarity then this might be enough: given \(\pi_0\) centered on vertex \(v\) you compute the PageRank and you take the vertices assigned the highest probability as the most similar.</p>
 
 <p>Alternatively, given any <i>two</i> vertices, we compute their PageRank’s separately, so each vertex gets transformed into a probability distribution. Now we simply use some standard method for comparing probability distributions such as <a href="http://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">KL Divergence</a> (which is also non-symmetric) or <a href="http://en.wikipedia.org/wiki/Bhattacharyya_distance">Bhattacharyya distance</a> (which <i>is</i> symmetric).</p>
 
 <h2 id="commute-times-and-hitting-times">Commute Times and Hitting Times</h2>
 
-<p><a href="http://en.wikipedia.org/wiki/Hitting_time">Hitting times</a> are a very interesting property that can capture a considerable amount of the connectivity structure of a graph. But depending on our application they might not map to the notion of similariy we want because it’s not symmetric between vertices, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> <script type="math/tex"> C_{ij} \equiv h_{ij} + h_{ji} </script> as the expected time to travel from i to j and then return back to i. </p>
+<p><a href="http://en.wikipedia.org/wiki/Hitting_time">Hitting times</a> are a very interesting property that can capture a considerable amount of the connectivity structure of a graph. But depending on our application they might not map to the notion of similariy we want because it’s not symmetric between vertices, i.e.: the hitting time from a to b is not the same as the hitting time from b to a. Fortunately there a very easy way to fix this: define the <i>commute time</i> \(C_{ij} \equiv h_{ij} + h_{ji}\) as the expected time to travel from i to j and then return back to i.</p>
 
 <p>Great! Now that we have a nice, symmetric notion of Markov similarity, how do we compute it?</p>
 
-<script type="math/tex; mode=display"> h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}} </script>
+\[h_{ij} = \frac{L_{jj}^\dagger}{\pi_j} - \frac{L_{ij}^\dagger}{\sqrt{\pi_i \pi_j}}\]
 
-<p>where <script type="math/tex"> L^\dagger = (L^T L)^{-1}L^T </script> is the <a href="http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse"><i>Moore-Penrose pseudoinverse</i></a>, <script type="math/tex">L = I - D^{-1/2} W D^{-1/2}</script> is the <a href="http://en.wikipedia.org/wiki/Laplacian_matrix"><i>normalized graph Laplacian</i></a>, and <script type="math/tex">\pi</script> is the stationary distribution of <script type="math/tex">P</script>. Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.</p>
+<p>where \(L^\dagger = (L^T L)^{-1}L^T\) is the <a href="http://en.wikipedia.org/wiki/Moore%E2%80%93Penrose_pseudoinverse"><i>Moore-Penrose pseudoinverse</i></a>, \(L = I - D^{-1/2} W D^{-1/2}\) is the <a href="http://en.wikipedia.org/wiki/Laplacian_matrix"><i>normalized graph Laplacian</i></a>, and \(\pi\) is the stationary distribution of \(P\). Now personally, I think this is a very cool formula. The only problem is that it’s totally useless for most practical calculations. Assuming the graph we’re dealing with is large enough to require exploiting its sparsity we’re out of luck because this formula relies entirely on computing the inverse of a very large, sparse matrix. And generically the inverse of a sparse matrix will be dense.</p>
 
 <p>This would seem to put us in a difficult position, but fear not brave programmer, for all hope is not lost!</p>
 
@@ -202,21 +202,21 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 
 <p>The hitting time can be computed by the following expectation value:</p>
 
-<script type="math/tex; mode=display"> h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}] </script>
+\[h_{ij} = \sum_{t=0}^\infty t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}]\]
 
-<p>Truncating this series at some <script type="math/tex">T-1</script> and adding in a remainder term we get the <i>truncated hitting time</i>:</p>
+<p>Truncating this series at some \(T-1\) and adding in a remainder term we get the <i>truncated hitting time</i>:</p>
 
-<script type="math/tex; mode=display"> h_{ij}(T) = \bigg(\sum_{t=0}^{T-1} t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}]\bigg) + T[1-\sum_{k=0}^{T-1}(P^k)_{ij}] </script>
+\[h_{ij}(T) = \bigg(\sum_{t=0}^{T-1} t(P^{t})_{ij}[1 - \sum_{k=0}^{t-1}(P^k)_{ij}]\bigg) + T[1-\sum_{k=0}^{T-1}(P^k)_{ij}]\]
 
 <p>Finally, we can rewrite the above equation as follows to avoid having to compute powers of the transition matrix:</p>
 
-<script type="math/tex; mode=display"> \rho_k^T(\hat{e}_i) = \rho_{k-1}^T(\hat{e}_i) P \mid \rho_0 = \hat{e}_i </script>
+\[\rho_k^T(\hat{e}_i) = \rho_{k-1}^T(\hat{e}_i) P \mid \rho_0 = \hat{e}_i\]
 
-<script type="math/tex; mode=display"> h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T)_j]\bigg) + T[1-\sum_{k=0}^{T-1}(\rho_k^T)_j] </script>
+\[h_{ij}(T) = \bigg(\sum_{t=0}^{T-1}t(\rho_t^T)_j[1 - \sum_{k=0}^{t-1}(\rho_k^T)_j]\bigg) + T[1-\sum_{k=0}^{T-1}(\rho_k^T)_j]\]
 
-<p>This approximation will always underestimate the true hitting time, as all the unused probabily mass after <script type="math/tex">T-1</script> gets lumped into the <script type="math/tex">T</script> term. Thus we’ll have to play with cutoff to make sure the range <script type="math/tex">[0, T]</script> has sufficient resolution to capture most of the interesting behavior.</p>
+<p>This approximation will always underestimate the true hitting time, as all the unused probabily mass after \(T-1\) gets lumped into the \(T\) term. Thus we’ll have to play with cutoff to make sure the range \([0, T]\) has sufficient resolution to capture most of the interesting behavior.</p>
 
-<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">sparse</span>
 
 
 <span class="k">def</span> <span class="nf">truncatedHittingTimes</span><span class="p">(</span><span class="n">W</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
@@ -238,7 +238,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
 		<span class="n">used_probability</span> <span class="o">+=</span> <span class="n">currentProbability</span>
 		<span class="n">h</span> <span class="o">+=</span> <span class="n">t</span><span class="o">*</span><span class="n">currentProbability</span>
 
-	<span class="k">return</span> <span class="n">h</span> <span class="o">+</span> <span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="n">one_vector</span><span class="o">-</span><span class="n">used_probability</span><span class="p">)</span></code></pre></div>
+	<span class="k">return</span> <span class="n">h</span> <span class="o">+</span> <span class="n">T</span><span class="o">*</span><span class="p">(</span><span class="n">one_vector</span><span class="o">-</span><span class="n">used_probability</span><span class="p">)</span></code></pre></figure>
 
 <h2 id="coda">Coda</h2>
 
@@ -261,7 +261,7 @@ We can compute the singular value decomposition on large matrices via the Lanczo
     
 
     
-      <a class="fa fa-twitter" href="https://twitter.com/intent/tweet?text=Understanding Similarity With Markov Chains&url=http://blog.stevenkapturowski.com/understanding-similarity" rel="nofollow" target="_blank" title="Share on Twitter"></a>
+      <a class="fa fa-twitter" href="https://twitter.com/intent/tweet?text=Understanding Similarity With Markov Chains&url=http://localhost:4000/understanding-similarity" rel="nofollow" target="_blank" title="Share on Twitter"></a>
     
 
     
@@ -273,13 +273,13 @@ We can compute the singular value decomposition on large matrices via the Lanczo
     
 
     
-      <a class="fa fa-reddit" href="http://reddit.com/submit?url=http://blog.stevenkapturowski.com/understanding-similarity&title=Understanding Similarity With Markov Chains" rel="nofollow" target="_blank" title="Share on Reddit"></a>
+      <a class="fa fa-reddit" href="http://reddit.com/submit?url=http://localhost:4000/understanding-similarity&title=Understanding Similarity With Markov Chains" rel="nofollow" target="_blank" title="Share on Reddit"></a>
     
 
     
 
     
-      <a class = "fa fa-hacker-news" onclick="parent.postMessage('submit','*')" href="https://news.ycombinator.com/submitlink?u=http://blog.stevenkapturowski.com/understanding-similarity&t=Understanding Similarity With Markov Chains" rel="nofollow" target="_blank" title="Share on Hacker News"></a>
+      <a class = "fa fa-hacker-news" onclick="parent.postMessage('submit','*')" href="https://news.ycombinator.com/submitlink?u=http://localhost:4000/understanding-similarity&t=Understanding Similarity With Markov Chains" rel="nofollow" target="_blank" title="Share on Hacker News"></a>
     
 
 
@@ -317,5 +317,7 @@ MathJax.Hub.Config({
   "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
 });
 </script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<!-- <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script> -->
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 

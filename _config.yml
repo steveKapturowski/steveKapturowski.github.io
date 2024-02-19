@@ -41,3 +41,6 @@ paginate:     10000
 sass:
   compressed: true
 
+# Plugins
+plugins: [jekyll-paginate]
+

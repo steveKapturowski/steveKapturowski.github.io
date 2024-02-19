@@ -8,7 +8,7 @@
     <meta name="description" content="The Ising model is a simplified description of ferromagnetism where spin-up and spin-down states sit on a d-dimensional lattice with an interaction defined between spins on neighboring sites. In one and two dimensions this model is analytically soluble, but because of that it makes a perfect playground to learn about Markov Chain Monte Carlo methods; a powerful tool with diverse applications in Bayesian statistics, statistical mechanics, and quantum field theory.">
     <meta name="author" content="Steven Kapturowski">
     <meta name="keywords" content="">
-    <link rel="canonical" href="http://blog.stevenkapturowski.com/ising-model">
+    <link rel="canonical" href="http://localhost:4000/ising-model">
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/pixyll.css" type="text/css">
@@ -27,7 +27,7 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="MCMC, Renormalization, and the Ising Model">
     <meta property="og:description" content="">
-    <meta property="og:url" content="http://blog.stevenkapturowski.com/ising-model">
+    <meta property="og:url" content="http://localhost:4000/ising-model">
     <meta property="og:site_name" content="Strange Matter - A fledgeling blog about math, machine learning, and black holes">
 
     <!-- Icons -->
@@ -52,7 +52,7 @@
     <header class="site-header px2 px-responsive">
   <div class="mt2 wrap">
     <div class="measure">
-      <a href="http://blog.stevenkapturowski.com" class="site-title">Strange Matter - A fledgeling blog about math, machine learning, and black holes</a>
+      <a href="http://localhost:4000" class="site-title">Strange Matter - A fledgeling blog about math, machine learning, and black holes</a>
       <nav class="site-nav right">
         <a href="/about/">About</a>
 <a href="/contact/">Contact</a>
@@ -99,7 +99,7 @@
   <h1>MCMC, Renormalization, and the Ising Model</h1>
   <span class="post-meta">May 16, 2015</span><br>
   
-  <span class="post-meta small">19 minute read</span>
+  <span class="post-meta small">18 minute read</span>
 </div>
 
 <article class="post-content">
@@ -432,45 +432,43 @@ input[type=range]::-webkit-slider-thumb {
 
 <h2 id="solving-the-ising-model-in-1d">Solving the Ising Model in 1D</h2>
 
-<script type="math/tex; mode=display"> H = -\sum K_{ij}\sigma_i\sigma_j - \mu\sum J_i\sigma_i </script>
+\[H = -\sum K_{ij}\sigma_i\sigma_j - \mu\sum J_i\sigma_i\]
 
-<script type="math/tex; mode=display"> Z = \sum_{\{\sigma\}} e^{-\beta H}</script>
+\[Z = \sum_{\{\sigma\}} e^{-\beta H}\]
 
-<p>As it turns out we have very nice formulas for energy, specific heat, magnetization, and susceptibility respectively: <script type="math/tex">E = -\frac{\partial\ln Z}{\partial \beta} </script>, <script type="math/tex">c_v = k\beta^2 \frac{\partial^2\ln Z}{\partial \beta^2}</script>, <script type="math/tex">M = -\frac{\partial\ln Z}{\partial J} \biggr\rvert_{J=0}</script>, and <script type="math/tex">\chi = -\frac{\partial^2\ln Z}{\partial J^2} \biggr\rvert_{J=0}</script>as well as the correlation functions, all in terms of the partition function <script type="math/tex">Z</script>. So, in principle, if we know the partition function, we know <i>everything</i></p>
+<p>As it turns out we have very nice formulas for energy, specific heat, magnetization, and susceptibility respectively: \(E = -\frac{\partial\ln Z}{\partial \beta}\), \(c_v = k\beta^2 \frac{\partial^2\ln Z}{\partial \beta^2}\), \(M = -\frac{\partial\ln Z}{\partial J} \biggr\rvert_{J=0}\), and \(\chi = -\frac{\partial^2\ln Z}{\partial J^2} \biggr\rvert_{J=0}\)as well as the correlation functions, all in terms of the partition function \(Z\). So, in principle, if we know the partition function, we know <i>everything</i></p>
 
-<p>The problem is that the number of terms in the sum is exponential in the number of states <script type="math/tex">\sigma</script>. There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we’ll do both.</p>
+<p>The problem is that the number of terms in the sum is exponential in the number of states \(\sigma\). There are two ways to deal with the situation: 1) figure out some fancy tricks to ananlytically coerce this unwieldy beast into submission, or 2) use numerical techniques which exploit the fact that only a relatively small number of states contribute appreciably to the partition function. Here, we’ll do both.</p>
 
 <p>Let’s start with (1):</p>
 
-<p>Let N be the length of the lattice in each direction and assume periodic boundary conditions such that <script type="math/tex">\sigma_{N}</script> neighbors <script type="math/tex">\sigma_{1}</script>. For simplicity let’s also turn off the external magnetic field (<script type="math/tex">h=0</script>). </p>
+<p>Let N be the length of the lattice in each direction and assume periodic boundary conditions such that \(\sigma_{N}\) neighbors \(\sigma_{1}\). For simplicity let’s also turn off the external magnetic field (\(h=0\)).</p>
 
-<script type="math/tex; mode=display">Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}</script>
+\[Z = \sum_{\{\sigma\}} e^{K\sigma_N \sigma_1} \prod_{k=1}^{N-1} e^{K\sigma_k \sigma_{k+1}}\]
 
-<p>Where <script type="math/tex">K = \beta J</script>. Defining the <i>transfer matrix</i>:</p>
+<p>Where \(K = \beta J\). Defining the <i>transfer matrix</i>:</p>
 
-<script type="math/tex; mode=display">% <![CDATA[
- T_{\sigma_k \sigma_{k+1}} =
+\[T_{\sigma_k \sigma_{k+1}} =
 \begin{bmatrix}
-    e^K    & e^{-K} \\
-    e^{-K} & e^K \\
-\end{bmatrix}
- %]]></script>
+    e^K    &amp; e^{-K} \\
+    e^{-K} &amp; e^K \\
+\end{bmatrix}\]
 
 <p>we can rewrite the partition function as follows:</p>
 
-<script type="math/tex; mode=display"> Z = \mbox{Tr}T^N = \lambda_1^N + \lambda_2^N </script>
+\[Z = \mbox{Tr}T^N = \lambda_1^N + \lambda_2^N\]
 
-<p>Diagonalizing <script type="math/tex">T</script> we find eigenvalues <script type="math/tex">\lambda_1 = 2\cosh K</script> and <script type="math/tex">\lambda_2 = 2\sinh K</script></p>
+<p>Diagonalizing \(T\) we find eigenvalues \(\lambda_1 = 2\cosh K\) and \(\lambda_2 = 2\sinh K\)</p>
 
 <p>So we end up with the particularly simple form:</p>
 
-<script type="math/tex; mode=display"> Z = (2\cosh K)^N + (2\sinh K)^N </script>
+\[Z = (2\cosh K)^N + (2\sinh K)^N\]
 
 <h2 id="thermodynamic-limit">Thermodynamic Limit</h2>
 
-<p>The abrubt changes in thermodynamic properties observed in phase transitions appears to be at odds with a description in terms of analytic functions. After all, the partition function is nothing more than a finite sum of exponentials. </p>
+<p>The abrubt changes in thermodynamic properties observed in phase transitions appears to be at odds with a description in terms of analytic functions. After all, the partition function is nothing more than a finite sum of exponentials.</p>
 
-<p>Being that <script type="math/tex">e^x</script> is everywhere analytic and realizing that a finite sum of analytic functions is itself analytic the partition function might at first seem hopelessly incapable of describing the physics of phase transitions. But <i>critically</i> (what a pun!), an <i>infinite</i> sum of analytic functions need not be analytic. A familiar example comes from Fourier Series where we find that an infinite number of sine waves can add up to a square wave:</p>
+<p>Being that \(e^x\) is everywhere analytic and realizing that a finite sum of analytic functions is itself analytic the partition function might at first seem hopelessly incapable of describing the physics of phase transitions. But <i>critically</i> (what a pun!), an <i>infinite</i> sum of analytic functions need not be analytic. A familiar example comes from Fourier Series where we find that an infinite number of sine waves can add up to a square wave:</p>
 
 <center>
 <div id="canvas-container" style="width: 800px; height: 300px;">
@@ -686,9 +684,9 @@ function drawArrow(t) {
 
 </script>
 
-<p>Typically we are not interested in small lattice sizes and want to know what the behavior looks like in macroscopic systems. Defining an intrinsic quantity <script type="math/tex">\,f = \frac{1}{N\beta}\ln Z</script> called the <i>free energy per spin</i>, we can take a well-defined limit as the number of sites goes to infinity. For our 1D solution:</p>
+<p>Typically we are not interested in small lattice sizes and want to know what the behavior looks like in macroscopic systems. Defining an intrinsic quantity \(\,f = \frac{1}{N\beta}\ln Z\) called the <i>free energy per spin</i>, we can take a well-defined limit as the number of sites goes to infinity. For our 1D solution:</p>
 
-<script type="math/tex; mode=display">\lim_{N \rightarrow \infty}f = \ln2 + \ln \cosh K</script>
+\[\lim_{N \rightarrow \infty}f = \ln2 + \ln \cosh K\]
 
 <p>Which is completely smooth. No phase transition in 1D. It seems we’ll have to try something more complicated if we are to capture our elusive prey.</p>
 
@@ -700,27 +698,27 @@ function drawArrow(t) {
 
 <p>To begin we rewrite the partition function as</p>
 
-<script type="math/tex; mode=display"> Z = \cosh(K)^N Z^\prime </script>
+\[Z = \cosh(K)^N Z^\prime\]
 
-<script type="math/tex; mode=display"> Z^\prime = \sum_{\{\sigma\}} \prod_{\langle i,j \rangle} [1 + \sigma_i \sigma_j \tanh(K)]</script>
+\[Z^\prime = \sum_{\{\sigma\}} \prod_{\langle i,j \rangle} [1 + \sigma_i \sigma_j \tanh(K)]\]
 
-<p>using the fact that <script type="math/tex">e^{\pm x} = \cosh(x)[1 \pm \tanh(x)] </script>. We can keep track of the terms combinitorically by matching the <script type="math/tex">\sigma_i \sigma_j \tanh(K)</script> terms up to edges in a subgraph <script type="math/tex">P</script> of the lattice:</p>
+<p>using the fact that \(e^{\pm x} = \cosh(x)[1 \pm \tanh(x)]\). We can keep track of the terms combinitorically by matching the \(\sigma_i \sigma_j \tanh(K)\) terms up to edges in a subgraph \(P\) of the lattice:</p>
 
-<script type="math/tex; mode=display"> Z^\prime = \sum_{\{P\}} \prod_{\langle i,j \rangle \in P} \sigma_i \sigma_j tanh(K)</script>
+\[Z^\prime = \sum_{\{P\}} \prod_{\langle i,j \rangle \in P} \sigma_i \sigma_j tanh(K)\]
 
-<p>Consider a subgraph consisting of a single non-self-intersecting path and let <script type="math/tex">P(k)</script> denote the <script type="math/tex">k</script>th site along the path: </p>
+<p>Consider a subgraph consisting of a single non-self-intersecting path and let \(P(k)\) denote the \(k\)th site along the path:</p>
 
 <center>
 	<img src="/images/kramers-wannier-duality-002.png" height="200" width="200" />
 </center>
 
-<script type="math/tex; mode=display"> \sum_{\{\sigma\}} \sigma_{i} \sigma_{P(1)}^2 \sigma_{P(2)}^2 \ldots \sigma_{P(L-1)}^2 \sigma_{f} = 0</script>
+\[\sum_{\{\sigma\}} \sigma_{i} \sigma_{P(1)}^2 \sigma_{P(2)}^2 \ldots \sigma_{P(L-1)}^2 \sigma_{f} = 0\]
 
-<p><i>unless</i> <script type="math/tex">P(0) = P(L)</script>, i.e.: <script type="math/tex">P</script> is a closed path. More generally, we can use this same idea to prove that the only link configurations that contribute to the partition function are those that form <i>even subgraphs</i>. Using this fact we can further simplify <script type="math/tex">Z^\prime</script>:</p>
+<p><i>unless</i> \(P(0) = P(L)\), i.e.: \(P\) is a closed path. More generally, we can use this same idea to prove that the only link configurations that contribute to the partition function are those that form <i>even subgraphs</i>. Using this fact we can further simplify \(Z^\prime\):</p>
 
-<script type="math/tex; mode=display"> Z^\prime = \sum_{l=0}^{2S} c(l) \tanh(K)^l </script>
+\[Z^\prime = \sum_{l=0}^{2S} c(l) \tanh(K)^l\]
 
-<p>where <script type="math/tex">c(l)</script> counts the number of even subgraphs with length <script type="math/tex">l</script>. This is one half of the duality, usually referred to as the <i>high temperature expansion</i>.</p>
+<p>where \(c(l)\) counts the number of even subgraphs with length \(l\). This is one half of the duality, usually referred to as the <i>high temperature expansion</i>.</p>
 
 <p>Now, consider the <i>dual</i> lattice whose sites sit in the squares of the original lattice and whose neighbors are those squares it shares an edge with. When we use periodic boundary conditions the lattice forms a torus, and in fact the dual lattice forms an identical torus!</p>
 
@@ -732,29 +730,29 @@ function drawArrow(t) {
 
 <p>At least, that is <i>almost</i> true. In fact the correspondence breaks down for certain subgraphs which wrap completely around the torus, but these terms contribute negligbly to the summation and will go to zero in the thermodynamic limit.</p>
 
-<p>At low energy all of the spins in the dual lattice will be lined up, so the ground state energy is <script type="math/tex">H_0 = -KN</script>. Thus, we can rewrite the original Hamiltonian as: </p>
+<p>At low energy all of the spins in the dual lattice will be lined up, so the ground state energy is \(H_0 = -KN\). Thus, we can rewrite the original Hamiltonian as:</p>
 
-<script type="math/tex; mode=display">H = H_0 + \sum_{\sigma_i \neq \sigma_j \vert \langle i,j \rangle} 2K</script>
+\[H = H_0 + \sum_{\sigma_i \neq \sigma_j \vert \langle i,j \rangle} 2K\]
 
-<p>Here the summation is only over the links connecting sites of differing spin, which occur precisely across each of the edges present in the subgraphs of the high temperature expansion; each edge lifing the energy by <script type="math/tex">2K</script>. Note that the energy of a configuration again depends <i>only</i> on the number of edges in the subgraph. This allows us to write the partition function in a suggestively familiar form:</p>
+<p>Here the summation is only over the links connecting sites of differing spin, which occur precisely across each of the edges present in the subgraphs of the high temperature expansion; each edge lifing the energy by \(2K\). Note that the energy of a configuration again depends <i>only</i> on the number of edges in the subgraph. This allows us to write the partition function in a suggestively familiar form:</p>
 
-<script type="math/tex; mode=display"> \hat{Z} = 2e^{\hat{K}N}\sum_{l=0}^{2N} c(l)e^{-2\hat{K}l} </script>
+\[\hat{Z} = 2e^{\hat{K}N}\sum_{l=0}^{2N} c(l)e^{-2\hat{K}l}\]
 
-<p>where the factor of 2 out front comes from the two-to-one correspondence between the dual lattice and even subgraphs on the original lattice. Behold: the <i>low temperature expansion</i>! </p>
+<p>where the factor of 2 out front comes from the two-to-one correspondence between the dual lattice and even subgraphs on the original lattice. Behold: the <i>low temperature expansion</i>!</p>
 
-<p>As we take <script type="math/tex">N \rightarrow \infty</script> both expansions must be identical under the identification <script type="math/tex">\tanh(K) \leftrightarrow e^{-2\hat{K}}</script>:</p>
+<p>As we take \(N \rightarrow \infty\) both expansions must be identical under the identification \(\tanh(K) \leftrightarrow e^{-2\hat{K}}\):</p>
 
-<script type="math/tex; mode=display"> \frac{\hat{Z}}{2e^{\hat{K}N}} = \frac{Z}{\cosh(K)^N} = \sum_{l} c(l)e^{-2\hat{K}l} = \sum_{l} c(l) \tanh(K)^l</script>
+\[\frac{\hat{Z}}{2e^{\hat{K}N}} = \frac{Z}{\cosh(K)^N} = \sum_{l} c(l)e^{-2\hat{K}l} = \sum_{l} c(l) \tanh(K)^l\]
 
-<p>This identification defines a mapping between high temperature and low temperature which preserves analytic behavior. Since critical points are <i>defined</i> by nonanalyticity, critical points must be mapped to critical points. </p>
+<p>This identification defines a mapping between high temperature and low temperature which preserves analytic behavior. Since critical points are <i>defined</i> by nonanalyticity, critical points must be mapped to critical points.</p>
 
-<p>If we assume the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus <script type="math/tex">K_c</script> occurs when <script type="math/tex">K=\hat{K}</script>, and manipulating the tanh term we get a polynomial in <script type="math/tex">\chi = e^{2K_c}</script>:</p>
+<p>If we assume the system contains only one phase transition, <i>it must be mapped to itself</i>. Thus \(K_c\) occurs when \(K=\hat{K}\), and manipulating the tanh term we get a polynomial in \(\chi = e^{2K_c}\):</p>
 
-<script type="math/tex; mode=display">\chi^2 - 2\chi - 1 = 0</script>
+\[\chi^2 - 2\chi - 1 = 0\]
 
 <p>Solving this we find the critical temperature</p>
 
-<script type="math/tex; mode=display"> T_c = \frac{2J}{k \ln(1+\sqrt2)} </script>
+\[T_c = \frac{2J}{k \ln(1+\sqrt2)}\]
 
 <p>and can now go to sleep. . .But ho! I am not through with you yet:</p>
 
@@ -762,40 +760,37 @@ function drawArrow(t) {
 
 <p>Every physics treatment of this algorithm that I’ve read feels as if it’s described backwards, so I’m going to try doing things a bit differently.</p>
 
-<p>The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let <script type="math/tex">P</script> denote the <script type="math/tex">2^Nx2^N</script> transition matrix whose entries <script type="math/tex">P_{AB}</script> represent the probability of transitioning from state <script type="math/tex">A</script> to state <script type="math/tex">B</script>.</p>
+<p>The overall idea is to build a markov chain whose equilibrium distribution of states matches the partition function. Let \(P\) denote the \(2^Nx2^N\) transition matrix whose entries \(P_{AB}\) represent the probability of transitioning from state \(A\) to state \(B\).</p>
 
-<p>A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the <a href="http://en.wikipedia.org/wiki/Detailed_balance"><i>detailed balance</i></a> condition: </p>
+<p>A <i>sufficient</i>, but not <i>necessary</i>, condition for the Markov chain to be in equilibrium is for it to satisfy the <a href="http://en.wikipedia.org/wiki/Detailed_balance"><i>detailed balance</i></a> condition:</p>
 
-<script type="math/tex; mode=display"> \pi_A P_{AB} = \pi_B P_{BA}</script>
+\[\pi_A P_{AB} = \pi_B P_{BA}\]
 
-<p>where <script type="math/tex">\pi</script> is the probability distribution over states. Since we want <script type="math/tex">\pi</script> to give the partition function, we must have <script type="math/tex">\pi_A = \frac{1}{Z}e^{-\beta E_A}</script>. Thus: </p>
+<p>where \(\pi\) is the probability distribution over states. Since we want \(\pi\) to give the partition function, we must have \(\pi_A = \frac{1}{Z}e^{-\beta E_A}\). Thus:</p>
 
-<script type="math/tex; mode=display"> \frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]} </script>
+\[\frac{\pi_A}{\pi_B} = \frac{P_{BA}}{P_{AB}} = e^{\beta[E_B-E_A]}\]
 
 <p>We have some freedom in choosing transition probabilities, they just need to satisfy this equation. So let’s define:</p>
 
-<script type="math/tex; mode=display">P_{AB} = \frac{1}{N} \mathcal{A}_{AB}</script>
+\[P_{AB} = \frac{1}{N} \mathcal{A}_{AB}\]
 
-<script type="math/tex; mode=display">% <![CDATA[
-
-\mathcal{A}_{AB} = \left\{
+\[\mathcal{A}_{AB} = \left\{
      \begin{array}{lr}
-       e^{\beta[E_B-E_A]} & : B < A\\
-       1 & : otherwise
+       e^{\beta[E_B-E_A]} &amp; : B &lt; A\\
+       1 &amp; : otherwise
      \end{array}
-   \right.
- %]]></script>
+   \right.\]
 
-<p>for <script type="math/tex">A \neq B</script> being nearest neighbors and <script type="math/tex">0</script> otherwise. Finally, the requirement that <script type="math/tex">P</script> be a stochastic matrix fixes <script type="math/tex">P_{AA} = 1 - \sum_{B \neq A}P_{AB} </script>. </p>
+<p>for \(A \neq B\) being nearest neighbors and \(0\) otherwise. Finally, the requirement that \(P\) be a stochastic matrix fixes \(P_{AA} = 1 - \sum_{B \neq A}P_{AB}\).</p>
 
 <p>Now that we know all this, we can finally define the <a href="http://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm"><i>Metropolis Algorithm</i></a>:</p>
 
 <ol>
-  <li>initialize lattice with some spin configuration <script type="math/tex">\{\sigma\}</script></li>
-  <li>choose <script type="math/tex">\sigma_i</script> uniformly at random (drawing from <script type="math/tex">p(\sigma_i) = \frac{1}{N}</script>)</li>
-  <li>set <script type="math/tex">\sigma_i := - \sigma_i</script> defining the transition <script type="math/tex">A \rightarrow B</script></li>
-  <li>accept new state with probability <script type="math/tex">\mathcal{A}_{AB}</script></li>
-  <li>if new state is rejected reset <script type="math/tex">\sigma_i</script> to its previous state</li>
+  <li>initialize lattice with some spin configuration \(\{\sigma\}\)</li>
+  <li>choose \(\sigma_i\) uniformly at random (drawing from \(p(\sigma_i) = \frac{1}{N}\))</li>
+  <li>set \(\sigma_i := - \sigma_i\) defining the transition \(A \rightarrow B\)</li>
+  <li>accept new state with probability \(\mathcal{A}_{AB}\)</li>
+  <li>if new state is rejected reset \(\sigma_i\) to its previous state</li>
   <li>proceed to step (1)</li>
 </ol>
 
@@ -805,20 +800,20 @@ function drawArrow(t) {
 
 <p>The starting point for most quantum field theory is the path integral, such as this one describing a real scalar field:</p>
 
-<script type="math/tex; mode=display"> Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\frac{1}{2}\partial_\mu\phi\partial^\mu\phi - \frac{1}{2}m^2\phi^2 - V(\phi)]} </script>
+\[Z = \int \mathcal{D}\phi e^{\frac{i}{h}\int dx^4 [\frac{1}{2}\partial_\mu\phi\partial^\mu\phi - \frac{1}{2}m^2\phi^2 - V(\phi)]}\]
 
-<p>Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress. </p>
+<p>Fancifully put, a real scalar field is just the physics in the continuum limit of an infinitely large mattress.</p>
 
-<p>The path integral is essentially a sum over all paths in spacetime. The notation of <script type="math/tex">\partial_\mu\phi\partial^\mu\phi</script> with <a href="http://en.wikipedia.org/wiki/Einstein_notation">one index raised and one lowered</a> encodes the metric of <a href="http://en.wikipedia.org/wiki/Minkowski_space">Minkowski space</a>. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle. </p>
+<p>The path integral is essentially a sum over all paths in spacetime. The notation of \(\partial_\mu\phi\partial^\mu\phi\) with <a href="http://en.wikipedia.org/wiki/Einstein_notation">one index raised and one lowered</a> encodes the metric of <a href="http://en.wikipedia.org/wiki/Minkowski_space">Minkowski space</a>. Described using this geometry the physics of special relativity essentially all boils down to the fact that you can convert space and time into each other by rotating through an imaginary angle.</p>
 
 <p>Since the functions being described here are analytic we can <a href="http://en.wikipedia.org/wiki/Wick_rotation"><i>rotate into imaginary time</i></a> to do our calculations in euclidean space and then use <a href="http://en.wikipedia.org/wiki/Analytic_continuation">analytic continuation</a> to put our results back into ordinary spacetime.</p>
 
 <p>But when you rotate into Euclidean space the exponent gets shuffled around:</p>
 
-<script type="math/tex; mode=display"> Z = \int \mathcal{D}\phi e^{-\frac{1}{\hbar}\int dx^4 [\frac{1}{2}\delta^{\mu\nu}\partial_\mu\phi\partial_\nu\phi + \frac{1}{2}m^2\phi^2 + V(\phi)]}
-= \int \mathcal{D}\phi e^{-\frac{1}{\hbar} H[\phi]} </script>
+\[Z = \int \mathcal{D}\phi e^{-\frac{1}{\hbar}\int dx^4 [\frac{1}{2}\delta^{\mu\nu}\partial_\mu\phi\partial_\nu\phi + \frac{1}{2}m^2\phi^2 + V(\phi)]}
+= \int \mathcal{D}\phi e^{-\frac{1}{\hbar} H[\phi]}\]
 
-<p>If you identify <script type="math/tex">\beta \leftrightarrow 1/\hbar</script> this is exactly analogous to the partition function in statistical mechanics. This is an example of a <i>duality</i>: every problem in quantum field theory has a corresponding problem in statistical mechanics, and vice versa. This greatly expands the variety of techniques at our disposal and has proven to be a powerful tool in physics. In particular the MCMC simulation we used here can be applied to quantum field theories and has been critical to understanding the <a href="http://en.wikipedia.org/wiki/Lattice_QCD">nonperturbative aspects of quantum chromodynamics</a>. But that’s for a future post…</p>
+<p>If you identify \(\beta \leftrightarrow 1/\hbar\) this is exactly analogous to the partition function in statistical mechanics. This is an example of a <i>duality</i>: every problem in quantum field theory has a corresponding problem in statistical mechanics, and vice versa. This greatly expands the variety of techniques at our disposal and has proven to be a powerful tool in physics. In particular the MCMC simulation we used here can be applied to quantum field theories and has been critical to understanding the <a href="http://en.wikipedia.org/wiki/Lattice_QCD">nonperturbative aspects of quantum chromodynamics</a>. But that’s for a future post…</p>
 
 <h2 id="links-and-resources">Links and Resources</h2>
 
@@ -844,7 +839,7 @@ function drawArrow(t) {
     
 
     
-      <a class="fa fa-twitter" href="https://twitter.com/intent/tweet?text=MCMC, Renormalization, and the Ising Model&url=http://blog.stevenkapturowski.com/ising-model" rel="nofollow" target="_blank" title="Share on Twitter"></a>
+      <a class="fa fa-twitter" href="https://twitter.com/intent/tweet?text=MCMC, Renormalization, and the Ising Model&url=http://localhost:4000/ising-model" rel="nofollow" target="_blank" title="Share on Twitter"></a>
     
 
     
@@ -856,13 +851,13 @@ function drawArrow(t) {
     
 
     
-      <a class="fa fa-reddit" href="http://reddit.com/submit?url=http://blog.stevenkapturowski.com/ising-model&title=MCMC, Renormalization, and the Ising Model" rel="nofollow" target="_blank" title="Share on Reddit"></a>
+      <a class="fa fa-reddit" href="http://reddit.com/submit?url=http://localhost:4000/ising-model&title=MCMC, Renormalization, and the Ising Model" rel="nofollow" target="_blank" title="Share on Reddit"></a>
     
 
     
 
     
-      <a class = "fa fa-hacker-news" onclick="parent.postMessage('submit','*')" href="https://news.ycombinator.com/submitlink?u=http://blog.stevenkapturowski.com/ising-model&t=MCMC, Renormalization, and the Ising Model" rel="nofollow" target="_blank" title="Share on Hacker News"></a>
+      <a class = "fa fa-hacker-news" onclick="parent.postMessage('submit','*')" href="https://news.ycombinator.com/submitlink?u=http://localhost:4000/ising-model&t=MCMC, Renormalization, and the Ising Model" rel="nofollow" target="_blank" title="Share on Hacker News"></a>
     
 
 
@@ -900,5 +895,7 @@ MathJax.Hub.Config({
   "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
 });
 </script>
-<script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script>
+<!-- <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML" type="text/javascript"></script> -->
+
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
 
